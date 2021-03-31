@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Hamsterdagis_Dessi.Migrations
 {
     [DbContext(typeof(HamsterAppContext))]
-    [Migration("20210331082859_Init")]
-    partial class Init
+    [Migration("20210331093154_updating")]
+    partial class updating
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -42,6 +42,9 @@ namespace Hamsterdagis_Dessi.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("Cage_Id")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
