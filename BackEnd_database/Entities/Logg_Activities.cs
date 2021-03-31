@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BackEnd_database
 {
-    class Logg_Activities
+    public class Logg_Activities
     {
         public int Id { get; set; }
         public DateTime Timestamp { get; set; }

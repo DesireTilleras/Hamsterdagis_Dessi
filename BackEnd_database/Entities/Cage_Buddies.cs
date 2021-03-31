@@ -6,12 +6,13 @@ using System.Threading.Tasks;
 
 namespace BackEnd_database
 { 
-    class Cage_Buddies
+    public class Cage_Buddies
     {
         public int Id { get; set; }
-
-        public Cage Cage { get; set; }
-
+        public int AmountOfBuddies { get; set; }
+        public virtual Cage Cage { get; set; }
+        public virtual Gender GenderInCage { get; set; }
         public virtual ICollection<Hamster> Hamsters { get; set; }
+
     }
 }

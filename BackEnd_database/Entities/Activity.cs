@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace BackEnd_database
 {
-    class Activity
+    public class Activity
     {
         public int Id { get; set; }
         public string Name { get; set; }
-
+    
     }
 }

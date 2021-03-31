@@ -12,5 +12,6 @@ namespace BackEnd_database
         public DateTime? TimeForLastExercise { get; set; }
         public virtual Owner Owner { get; set; }
         public virtual Gender Gender { get; set; }
+        public virtual Activity Activity { get; set; }
     }
 }

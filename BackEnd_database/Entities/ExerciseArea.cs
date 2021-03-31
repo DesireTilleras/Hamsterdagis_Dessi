@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BackEnd_database
 { // OBS!! Max 6 hamstrar i motionsområdet samtidigt
-    class ExerciseArea
+    public class ExerciseArea
     {
         public int Id { get; set; }
         public int AmountInArea { get; set; }
