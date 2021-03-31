@@ -10,7 +10,9 @@ namespace BackEnd_database
     {
         public int Id { get; set; }
         public DateTime Timestamp { get; set; }
+        public int HamsterId { get; set; }
+        public virtual Hamster Hamster { get; set; }
         public virtual ICollection<Activity> Activities { get; set; }
-        public virtual ICollection<Hamster> Hamsters { get; set; }
+        
     }
 }

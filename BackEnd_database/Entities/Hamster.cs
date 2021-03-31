@@ -9,6 +9,7 @@ namespace BackEnd_database
         public int Age { get; set; }
         public DateTime? CheckInTime { get; set; }
         public DateTime? TimeForLastExercise { get; set; }
+        //public TimeSpan? TimeWaited { get; set; }
         public int OwnerId { get; set; }
         public virtual Owner Owner { get; set; }
         public int GenderId { get; set; }

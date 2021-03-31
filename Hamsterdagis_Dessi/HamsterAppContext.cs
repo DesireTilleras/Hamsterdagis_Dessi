@@ -33,7 +33,8 @@ namespace Hamsterdagis_Dessi
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer("Server=localhost;Database=advDesireTilleras;Trusted_Connection=True;");
+                optionsBuilder.UseSqlServer("Server=localhost;Database=advDesireTilleras;Trusted_Connection=True;")
+                    .UseLazyLoadingProxies();
             }
         }
 
