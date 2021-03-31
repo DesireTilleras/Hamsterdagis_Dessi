@@ -6,10 +6,7 @@ namespace Hamsterdagis_Dessi
     {
         static void Main(string[] args)
         {
-            AddingDataInTables addingdata = new AddingDataInTables();
-            //addingdata.AddingOwners();
-            //addingdata.addingGenders();
-            //addingdata.addingCages();
+
         }
     }
 }

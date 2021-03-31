@@ -10,7 +10,6 @@ namespace BackEnd_database
     public class Cage
     {
         public int Id { get; set; }
-        public int Cage_Id { get; set; }
 
     }
 }

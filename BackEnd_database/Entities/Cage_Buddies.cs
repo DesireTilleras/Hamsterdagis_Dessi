@@ -10,8 +10,8 @@ namespace BackEnd_database
     {
         public int Id { get; set; }
         public int AmountOfBuddies { get; set; }
+        public int CageId { get; set; }
         public virtual Cage Cage { get; set; }
-        public virtual Gender GenderInCage { get; set; }
         public virtual ICollection<Hamster> Hamsters { get; set; }
 
     }
