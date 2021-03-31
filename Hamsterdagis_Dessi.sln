@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31112.23
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hamsterdagis_Dessi", "Hamsterdagis_Dessi\Hamsterdagis_Dessi.csproj", "{B92A847B-A2BD-44DE-82B2-992141AE9611}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BackEnd_database", "BackEnd_database\BackEnd_database.csproj", "{12965384-7AC7-4742-B388-4ECCF70C8F53}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B92A847B-A2BD-44DE-82B2-992141AE9611}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B92A847B-A2BD-44DE-82B2-992141AE9611}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B92A847B-A2BD-44DE-82B2-992141AE9611}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B92A847B-A2BD-44DE-82B2-992141AE9611}.Release|Any CPU.Build.0 = Release|Any CPU
+		{12965384-7AC7-4742-B388-4ECCF70C8F53}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{12965384-7AC7-4742-B388-4ECCF70C8F53}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{12965384-7AC7-4742-B388-4ECCF70C8F53}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{12965384-7AC7-4742-B388-4ECCF70C8F53}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {807B16E2-B2CC-4119-A1DD-6366F1B48D92}
+	EndGlobalSection
+EndGlobal
