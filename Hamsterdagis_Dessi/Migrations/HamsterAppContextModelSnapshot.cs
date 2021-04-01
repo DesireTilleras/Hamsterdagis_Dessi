@@ -19,6 +19,21 @@ namespace Hamsterdagis_Dessi.Migrations
                 .HasAnnotation("ProductVersion", "5.0.4")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+            modelBuilder.Entity("ActivityLogg_Activities", b =>
+                {
+                    b.Property<int>("ActivitiesId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Logg_ActivitiesId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ActivitiesId", "Logg_ActivitiesId");
+
+                    b.HasIndex("Logg_ActivitiesId");
+
+                    b.ToTable("ActivityLogg_Activities");
+                });
+
             modelBuilder.Entity("BackEnd_database.Activity", b =>
                 {
                     b.Property<int>("Id")
@@ -26,15 +41,10 @@ namespace Hamsterdagis_Dessi.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("Logg_ActivitiesId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Logg_ActivitiesId");
 
                     b.ToTable("Activities");
 
@@ -68,6 +78,9 @@ namespace Hamsterdagis_Dessi.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<int>("AmountInCage")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.ToTable("Cages");
@@ -75,64 +88,54 @@ namespace Hamsterdagis_Dessi.Migrations
                     b.HasData(
                         new
                         {
-                            Id = 1
+                            Id = 1,
+                            AmountInCage = 0
                         },
                         new
                         {
-                            Id = 2
+                            Id = 2,
+                            AmountInCage = 0
                         },
                         new
                         {
-                            Id = 3
+                            Id = 3,
+                            AmountInCage = 0
                         },
                         new
                         {
-                            Id = 4
+                            Id = 4,
+                            AmountInCage = 0
                         },
                         new
                         {
-                            Id = 5
+                            Id = 5,
+                            AmountInCage = 0
                         },
                         new
                         {
-                            Id = 6
+                            Id = 6,
+                            AmountInCage = 0
                         },
                         new
                         {
-                            Id = 7
+                            Id = 7,
+                            AmountInCage = 0
                         },
                         new
                         {
-                            Id = 8
+                            Id = 8,
+                            AmountInCage = 0
                         },
                         new
                         {
-                            Id = 9
+                            Id = 9,
+                            AmountInCage = 0
                         },
                         new
                         {
-                            Id = 10
+                            Id = 10,
+                            AmountInCage = 0
                         });
-                });
-
-            modelBuilder.Entity("BackEnd_database.Cage_Buddies", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("AmountOfBuddies")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CageId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CageId");
-
-                    b.ToTable("Cage_Buddies");
                 });
 
             modelBuilder.Entity("BackEnd_database.ExerciseArea", b =>
@@ -148,6 +151,13 @@ namespace Hamsterdagis_Dessi.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ExerciseAreas");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            AmountInArea = 0
+                        });
                 });
 
             modelBuilder.Entity("BackEnd_database.Gender", b =>
@@ -190,7 +200,7 @@ namespace Hamsterdagis_Dessi.Migrations
                     b.Property<int>("Age")
                         .HasColumnType("int");
 
-                    b.Property<int?>("Cage_BuddiesId")
+                    b.Property<int?>("CageId")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("CheckInTime")
@@ -205,9 +215,6 @@ namespace Hamsterdagis_Dessi.Migrations
                     b.Property<string>("Hamster_Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("Logg_ActivitiesId")
-                        .HasColumnType("int");
-
                     b.Property<int>("OwnerId")
                         .HasColumnType("int");
 
@@ -218,13 +225,11 @@ namespace Hamsterdagis_Dessi.Migrations
 
                     b.HasIndex("ActivityId");
 
-                    b.HasIndex("Cage_BuddiesId");
+                    b.HasIndex("CageId");
 
                     b.HasIndex("ExerciseAreaId");
 
                     b.HasIndex("GenderId");
-
-                    b.HasIndex("Logg_ActivitiesId");
 
                     b.HasIndex("OwnerId");
 
@@ -480,10 +485,15 @@ namespace Hamsterdagis_Dessi.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<int>("HamsterId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("HamsterId");
 
                     b.ToTable("Logg_Activities");
                 });
@@ -635,47 +645,40 @@ namespace Hamsterdagis_Dessi.Migrations
                         });
                 });
 
-            modelBuilder.Entity("BackEnd_database.Activity", b =>
+            modelBuilder.Entity("ActivityLogg_Activities", b =>
                 {
-                    b.HasOne("BackEnd_database.Logg_Activities", null)
-                        .WithMany("Activities")
-                        .HasForeignKey("Logg_ActivitiesId");
-                });
-
-            modelBuilder.Entity("BackEnd_database.Cage_Buddies", b =>
-                {
-                    b.HasOne("BackEnd_database.Cage", "Cage")
+                    b.HasOne("BackEnd_database.Activity", null)
                         .WithMany()
-                        .HasForeignKey("CageId")
+                        .HasForeignKey("ActivitiesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Cage");
+                    b.HasOne("BackEnd_database.Logg_Activities", null)
+                        .WithMany()
+                        .HasForeignKey("Logg_ActivitiesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("BackEnd_database.Hamster", b =>
                 {
                     b.HasOne("BackEnd_database.Activity", "Activity")
-                        .WithMany()
+                        .WithMany("Hamsters")
                         .HasForeignKey("ActivityId");
 
-                    b.HasOne("BackEnd_database.Cage_Buddies", null)
+                    b.HasOne("BackEnd_database.Cage", "Cage")
                         .WithMany("Hamsters")
-                        .HasForeignKey("Cage_BuddiesId");
+                        .HasForeignKey("CageId");
 
                     b.HasOne("BackEnd_database.ExerciseArea", null)
                         .WithMany("Hamsters")
                         .HasForeignKey("ExerciseAreaId");
 
                     b.HasOne("BackEnd_database.Gender", "Gender")
-                        .WithMany()
+                        .WithMany("Hamsters")
                         .HasForeignKey("GenderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("BackEnd_database.Logg_Activities", null)
-                        .WithMany("Hamsters")
-                        .HasForeignKey("Logg_ActivitiesId");
 
                     b.HasOne("BackEnd_database.Owner", "Owner")
                         .WithMany("Hamsters")
@@ -685,12 +688,30 @@ namespace Hamsterdagis_Dessi.Migrations
 
                     b.Navigation("Activity");
 
+                    b.Navigation("Cage");
+
                     b.Navigation("Gender");
 
                     b.Navigation("Owner");
                 });
 
-            modelBuilder.Entity("BackEnd_database.Cage_Buddies", b =>
+            modelBuilder.Entity("BackEnd_database.Logg_Activities", b =>
+                {
+                    b.HasOne("BackEnd_database.Hamster", "Hamster")
+                        .WithMany("Logg_Activities")
+                        .HasForeignKey("HamsterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Hamster");
+                });
+
+            modelBuilder.Entity("BackEnd_database.Activity", b =>
+                {
+                    b.Navigation("Hamsters");
+                });
+
+            modelBuilder.Entity("BackEnd_database.Cage", b =>
                 {
                     b.Navigation("Hamsters");
                 });
@@ -700,11 +721,14 @@ namespace Hamsterdagis_Dessi.Migrations
                     b.Navigation("Hamsters");
                 });
 
-            modelBuilder.Entity("BackEnd_database.Logg_Activities", b =>
+            modelBuilder.Entity("BackEnd_database.Gender", b =>
                 {
-                    b.Navigation("Activities");
-
                     b.Navigation("Hamsters");
+                });
+
+            modelBuilder.Entity("BackEnd_database.Hamster", b =>
+                {
+                    b.Navigation("Logg_Activities");
                 });
 
             modelBuilder.Entity("BackEnd_database.Owner", b =>

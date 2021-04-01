@@ -65,6 +65,9 @@ namespace Hamsterdagis_Dessi
                 new Activity {Id = 4, Name = "PickUp" }
                 );
 
+            modelBuilder.Entity<ExerciseArea>().HasData(
+                new ExerciseArea { Id = 1, AmountInArea = 0});
+
             string[] csvLines = File.ReadAllLines(@"C:\Users\desir\Documents\Avancerad.Net\TENTA\Tentan\Hamsterdagis_Dessi\Hamsterlista30.csv");
 
             for (int i = 1; i < csvLines.Length; i++)

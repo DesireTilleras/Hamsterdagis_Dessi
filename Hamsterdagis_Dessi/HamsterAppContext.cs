@@ -15,7 +15,6 @@ namespace Hamsterdagis_Dessi
         public DbSet<Owner> Owners { get; set; }
         public DbSet<Gender> Genders { get; set; }
         public DbSet<Cage> Cages { get; set; }
-        public DbSet<Cage_Buddies> Cage_Buddies { get; set; }
         public DbSet<ExerciseArea> ExerciseAreas { get; set; }
         public DbSet<Activity> Activities { get; set; }
         public DbSet<Logg_Activities> Logg_Activities { get; set; }

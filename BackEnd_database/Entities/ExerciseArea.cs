@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 
 namespace BackEnd_database
 { // OBS!! Max 6 hamstrar i motionsområdet samtidigt
+    // En motionsyta kan ha flera hamstrar
+    // En hamster kan bara ha en motionsyta
     public class ExerciseArea
     {
         public int Id { get; set; }

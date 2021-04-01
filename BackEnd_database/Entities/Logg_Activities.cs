@@ -5,7 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace BackEnd_database
-{
+{ // Loggen ska skriva ut hur länge hamstern fick vänta innan motion
+    // En hamster kan ha flera loggar
+    // En logg kan bara ha en hamster
+    // En logg kan ha flera aktiviteter 
+    // En aktivitet kan ha flera hamstrar
     public class Logg_Activities
     {
         public int Id { get; set; }
