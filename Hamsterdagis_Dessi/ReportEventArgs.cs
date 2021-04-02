@@ -9,7 +9,7 @@ namespace Hamsterdagis_Dessi
 {
     public class ReportEventArgs: EventArgs
     {
-        
-        
+        public Hamster Hamster { get; set; }
+
     }
 }

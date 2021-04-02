@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Hamsterdagis_Dessi.Migrations
 {
     [DbContext(typeof(HamsterAppContext))]
-    [Migration("20210401111114_init")]
+    [Migration("20210402110015_init")]
     partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -20,21 +20,6 @@ namespace Hamsterdagis_Dessi.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("ProductVersion", "5.0.4")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-            modelBuilder.Entity("ActivityLogg_Activities", b =>
-                {
-                    b.Property<int>("ActivitiesId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Logg_ActivitiesId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ActivitiesId", "Logg_ActivitiesId");
-
-                    b.HasIndex("Logg_ActivitiesId");
-
-                    b.ToTable("ActivityLogg_Activities");
-                });
 
             modelBuilder.Entity("BackEnd_database.Activity", b =>
                 {
@@ -220,8 +205,14 @@ namespace Hamsterdagis_Dessi.Migrations
                     b.Property<int>("OwnerId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("TimeForFirstExercise")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime?>("TimeForLastExercise")
                         .HasColumnType("datetime2");
+
+                    b.Property<TimeSpan?>("TimeWaited")
+                        .HasColumnType("time");
 
                     b.HasKey("Id");
 
@@ -487,6 +478,9 @@ namespace Hamsterdagis_Dessi.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<int>("ActivityId")
+                        .HasColumnType("int");
+
                     b.Property<int>("HamsterId")
                         .HasColumnType("int");
 
@@ -494,6 +488,8 @@ namespace Hamsterdagis_Dessi.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ActivityId");
 
                     b.HasIndex("HamsterId");
 
@@ -647,21 +643,6 @@ namespace Hamsterdagis_Dessi.Migrations
                         });
                 });
 
-            modelBuilder.Entity("ActivityLogg_Activities", b =>
-                {
-                    b.HasOne("BackEnd_database.Activity", null)
-                        .WithMany()
-                        .HasForeignKey("ActivitiesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("BackEnd_database.Logg_Activities", null)
-                        .WithMany()
-                        .HasForeignKey("Logg_ActivitiesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("BackEnd_database.Hamster", b =>
                 {
                     b.HasOne("BackEnd_database.Activity", "Activity")
@@ -699,11 +680,19 @@ namespace Hamsterdagis_Dessi.Migrations
 
             modelBuilder.Entity("BackEnd_database.Logg_Activities", b =>
                 {
+                    b.HasOne("BackEnd_database.Activity", "Activity")
+                        .WithMany("Logg_Activities")
+                        .HasForeignKey("ActivityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("BackEnd_database.Hamster", "Hamster")
                         .WithMany("Logg_Activities")
                         .HasForeignKey("HamsterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Activity");
 
                     b.Navigation("Hamster");
                 });
@@ -711,6 +700,8 @@ namespace Hamsterdagis_Dessi.Migrations
             modelBuilder.Entity("BackEnd_database.Activity", b =>
                 {
                     b.Navigation("Hamsters");
+
+                    b.Navigation("Logg_Activities");
                 });
 
             modelBuilder.Entity("BackEnd_database.Cage", b =>

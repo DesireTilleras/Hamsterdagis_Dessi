@@ -16,7 +16,13 @@ namespace BackEnd_database
         public DateTime Timestamp { get; set; }
         public int HamsterId { get; set; }
         public virtual Hamster Hamster { get; set; }
-        public virtual ICollection<Activity> Activities { get; set; }
-        
+        public int ActivityId { get; set; }
+        public virtual Activity Activity { get; set; }
+
+        public override string ToString()
+        {
+            return $"{Hamster.Hamster_Name}"; 
+        }
+
     }
 }

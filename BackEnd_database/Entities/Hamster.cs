@@ -18,14 +18,20 @@ namespace BackEnd_database
         public virtual Cage Cage { get; set; }
         public DateTime? CheckInTime { get; set; }
         public DateTime? TimeForLastExercise { get; set; }
+        public DateTime? TimeForFirstExercise { get; set; }
 
-        //public TimeSpan? TimeWaited { get; set; }        
+        public TimeSpan? TimeWaited { get; set; }
 
         public virtual ICollection<Logg_Activities> Logg_Activities { get; set; } 
 
         public Hamster()
         {
-            
+           
+        }
+
+        public override string ToString()
+        {
+            return $"{Hamster_Name}";
         }
     }
 }

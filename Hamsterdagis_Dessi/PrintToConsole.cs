@@ -10,7 +10,8 @@ namespace Hamsterdagis_Dessi
     {
         public void PrintReport(object sender, ReportEventArgs args)
         {
-            Console.WriteLine($", bla bla bla");
+            Console.WriteLine($"{args.Hamster.ToString()} moved to activity : {args.Hamster.Activity.Name}");
         }
+
     }
 }

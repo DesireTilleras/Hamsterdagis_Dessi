@@ -43,52 +43,59 @@ namespace Hamsterdagis_Dessi
 
         public void OnTick(Object state)
         {
-            CurrentAmountOfTicks++;
-            CurrentTime = SimulationStart.AddMinutes(CurrentAmountOfTicks * 6);
-            Task task1 = new Task(checkIn);
-            task1.Start();
-            //allinfo.TimeWaited = (TimeSpan)(hamster.TimeWaited);
-        }
+            if (CurrentAmountOfTicks <= AmountOfTicks)
+            {
+                CurrentAmountOfTicks++;
+                CurrentTime = SimulationStart.AddMinutes(CurrentAmountOfTicks * 6);
+                Task task1 = new Task(moveToExerciseFemales);
+                Task task2 = new Task(checkOutFromExArea);
+                Task task3 = new Task(moveToExerciseMale);
+                task1.Start();
+                task1.Wait();
+                CountingExerciseTick++;
+                task3.Start();
+                task3.Wait();
+
+                if (CountingExerciseTick == 10)
+                {
+                    task2.Start();
+                    task2.Wait();
+                    CountingExerciseTick = 0;
+                }
+
+                Console.WriteLine($"{CurrentAmountOfTicks}   {CountingExerciseTick} ");
+            }
+         }
         public void OnEvery60Tick(Object state)
         {
             //Här ska metoden som checkar ut hamstrar från exercisearea vara. 
         }
         public void StartSimulation(int days, int minutesOfSimulation)
         {
-            //checkIn();//Alla hamstrar checkas in och får Incheckningsdatum samt status "arrival"
-            ////Sen ska hamstrarna läggas i sina burar, 3 i varje bur och de måste vara av samma kön. 
-            //PutInCageFemales();
-            //PutInCageMales();
+            SimulationStart = new DateTime(2021, 03, 26, 07, 00, 00);
+            checkIn();//Alla hamstrar checkas in och får Incheckningsdatum samt status "arrival"
+            //Sen ska hamstrarna läggas i sina burar, 3 i varje bur och de måste vara av samma kön. 
+            PutInCageFemales();
+            PutInCageMales();
 
-            //moveToExerciseFemales();
+            AmountOfTicks = days * 100;
+            float timeOfTick = (minutesOfSimulation * 60F / AmountOfTicks) * 1000F;
+            TimeOfOneTick = (int)timeOfTick;
+            
+            Tick = new Timer(new TimerCallback(OnTick), null, 1000, TimeOfOneTick);
+            
+            if (AmountOfTicks <= CurrentAmountOfTicks)
+            {
+                Tick.Dispose();
+                Console.WriteLine("End");
 
-            //checkOutFromExArea();
-
-            moveToExerciseMale();
-
-
-            //while (AmountOfTicks >= CurrentAmountOfTicks)
-            //{
-            //    AmountOfTicks = days * 100;
-            //    TimeOfOneTick = ((minutesOfSimulation * 60) / AmountOfTicks) * 1000;
-            //    SimulationStart = new DateTime(2021, 03, 26, 07, 00, 00);
-            //    Tick = new Timer(new TimerCallback(OnTick), null, 1000, TimeOfOneTick);
-            //    // Simulation ska pågå tills att CurrentTicks är lika mycket som AmountOfTicks. 
-
-            //}
-
-
+            }
         }
 
         public void PutInCageFemales()
         {
             using (var hamsterContext = new HamsterAppContext())
             {
-                // Den ska ta ut alla honor och lägga dme i en lista
-                // Sedan ska honorna få status "DayCage och bli tilldelade en bur
-                // Sedan ska honorna tas ut ur listan
-                // Detta ska hållas på sålänge som listan inte är 0 i antal
-
                 var listOfFemales = hamsterContext.Hamsters.Where(hamster => hamster.Gender.Id == 1).ToList();
 
                 while (listOfFemales.Count != 0)
@@ -163,16 +170,32 @@ namespace Hamsterdagis_Dessi
 
             using (var hamsterContext = new HamsterAppContext())
             {
-                hamsterContext.Hamsters.Where(hamster => hamster.ActivityId == 3)
-                     .ToList()
-                     .ForEach(hamster => hamster.ActivityId = 2);
-
-               var area = hamsterContext.ExerciseAreas.Where(area => area.AmountInArea > 0).First();
+                var area = hamsterContext.ExerciseAreas.Single(area => area.AmountInArea >= 0);
                 area.AmountInArea = 0;
 
-                hamsterContext.SaveChanges();
+                var listOfHamsters = hamsterContext.Hamsters.Where(hamster => hamster.ActivityId == 3)
+                      .ToList();
 
-                Console.WriteLine("No hamsters in exercisearea");
+                foreach (var hamster in listOfHamsters)
+                {
+                    hamster.ActivityId = 2;
+                    if (hamster.TimeForFirstExercise == null)
+                    {
+                        hamster.TimeForFirstExercise = hamster.TimeForLastExercise;
+                        hamster.TimeWaited = CurrentTime - SimulationStart;
+                    }
+                    else
+                    {
+                        hamster.TimeWaited = hamster.TimeForFirstExercise - SimulationStart;
+                    }
+                    hamster.TimeForLastExercise = CurrentTime;
+
+                    hamsterContext.Logg_Activities.Add(new Logg_Activities { HamsterId = hamster.Id, Timestamp = CurrentTime, ActivityId = 2 });
+                    allinfo.Hamster = hamster;
+                    ReportEventHandler?.Invoke(this, allinfo);
+                    
+                }
+                hamsterContext.SaveChanges();
             }
         }
 
@@ -199,15 +222,27 @@ namespace Hamsterdagis_Dessi
             using (var hamsterContext = new HamsterAppContext())
             {
                 if (checkIfAreaIsFree())
-                {
-                    CountingExerciseTick = 0;
+                {                    
                     var listOfFemalesNoExercise = hamsterContext.Hamsters.Where(hamster => hamster.TimeForLastExercise == null)
                         .Where(hamster => hamster.Gender.Id == 1)
                         .Take(6)
                         .ToList();
+                    var listOfFemalesLastExercise = hamsterContext.Hamsters.OrderByDescending(hamster => hamster.TimeWaited)
+                        .Where(hamster => hamster.Gender.Id == 1)
+                        .Take(6 - listOfFemalesNoExercise.Count())
+                        .ToList();
 
-                    var area = hamsterContext.ExerciseAreas.Where(area => area.Id == 1).First();
+                    if (listOfFemalesLastExercise.Count() > 0 && listOfFemalesNoExercise.Count() < 6)
+                    {
+                        foreach (var hamster in listOfFemalesLastExercise)
+                        {
+                            listOfFemalesNoExercise.Add(hamster);
+                        }
+                    }
+
+                    var area = hamsterContext.ExerciseAreas.Single(area => area.Id == 1);
                     area.AmountInArea = listOfFemalesNoExercise.Count();
+                    hamsterContext.SaveChanges();
 
                     foreach (var hamster in listOfFemalesNoExercise)
                     {
@@ -215,9 +250,18 @@ namespace Hamsterdagis_Dessi
                         hamster.TimeForLastExercise = CurrentTime;
                         hamsterContext.SaveChanges();
 
-                        Console.WriteLine($"{hamster.Hamster_Name} is in the exercisearea");
+                        if (hamster.TimeForFirstExercise == null)
+                        {
+                            hamster.TimeForFirstExercise = hamster.TimeForLastExercise;
+                            hamsterContext.SaveChanges();
+                        }   
+                        hamster.TimeWaited = hamster.TimeForFirstExercise- SimulationStart;
+                        hamsterContext.SaveChanges();
+                        allinfo.Hamster = hamster;
+                        ReportEventHandler?.Invoke(this, allinfo);
 
                     }
+                    
                 }
             }
         }
@@ -228,7 +272,7 @@ namespace Hamsterdagis_Dessi
             {
                 if (checkIfAreaIsFree())
                 {
-                    CountingExerciseTick = 0;
+                    
                     var listOfFemalesNoExercise = hamsterContext.Hamsters.Where(hamster => hamster.TimeForLastExercise == null)
                         .Where(hamster => hamster.Gender.Id == 2)
                         .Take(6)
@@ -242,19 +286,15 @@ namespace Hamsterdagis_Dessi
                         hamster.ActivityId = 3;
                         hamster.TimeForLastExercise = CurrentTime;
                         hamsterContext.SaveChanges();
-
-                        Console.WriteLine($"{hamster.Hamster_Name} is in the exercisearea");
-
+                        allinfo.Hamster = hamster;
+                        ReportEventHandler?.Invoke(this, allinfo);
                     }
                 }
             }
 
         }
 
-        public void moveFromExercise()
-        {
 
-        }
     }
 }
 
