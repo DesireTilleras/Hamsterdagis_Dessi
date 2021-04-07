@@ -17,10 +17,14 @@ namespace BackEnd_database
         public int? CageId { get; set; }
         public virtual Cage Cage { get; set; }
         public DateTime? CheckInTime { get; set; }
-        public DateTime? TimeForLastExercise { get; set; }
-        public DateTime? TimeForFirstExercise { get; set; }
+        public DateTime? StartTimeExercise { get; set; }
+        public DateTime? EndTimeExercise { get; set; }
+        public TimeSpan? TotalTimeWaited { get; set; }
 
         public TimeSpan? TimeWaited { get; set; }
+
+        public int AmountOfExercises { get; set; }
+
 
         public virtual ICollection<Logg_Activities> Logg_Activities { get; set; } 
 

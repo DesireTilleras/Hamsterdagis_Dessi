@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Hamsterdagis_Dessi.Migrations
 {
-    public partial class init : Migration
+    public partial class Init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -85,9 +85,11 @@ namespace Hamsterdagis_Dessi.Migrations
                     ActivityId = table.Column<int>(type: "int", nullable: true),
                     CageId = table.Column<int>(type: "int", nullable: true),
                     CheckInTime = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    TimeForLastExercise = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    TimeForFirstExercise = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    StartTimeExercise = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    EndTimeExercise = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    TotalTimeWaited = table.Column<TimeSpan>(type: "time", nullable: true),
                     TimeWaited = table.Column<TimeSpan>(type: "time", nullable: true),
+                    AmountOfExercises = table.Column<int>(type: "int", nullable: false),
                     ExerciseAreaId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
@@ -132,8 +134,8 @@ namespace Hamsterdagis_Dessi.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    HamsterId = table.Column<int>(type: "int", nullable: false),
-                    ActivityId = table.Column<int>(type: "int", nullable: false)
+                    HamsterId = table.Column<int>(type: "int", nullable: true),
+                    ActivityId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -143,13 +145,13 @@ namespace Hamsterdagis_Dessi.Migrations
                         column: x => x.ActivityId,
                         principalTable: "Activities",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Logg_Activities_Hamsters_HamsterId",
                         column: x => x.HamsterId,
                         principalTable: "Hamsters",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.InsertData(
@@ -233,39 +235,39 @@ namespace Hamsterdagis_Dessi.Migrations
 
             migrationBuilder.InsertData(
                 table: "Hamsters",
-                columns: new[] { "Id", "ActivityId", "Age", "CageId", "CheckInTime", "ExerciseAreaId", "GenderId", "Hamster_Name", "OwnerId", "TimeForFirstExercise", "TimeForLastExercise", "TimeWaited" },
+                columns: new[] { "Id", "ActivityId", "Age", "AmountOfExercises", "CageId", "CheckInTime", "EndTimeExercise", "ExerciseAreaId", "GenderId", "Hamster_Name", "OwnerId", "StartTimeExercise", "TimeWaited", "TotalTimeWaited" },
                 values: new object[,]
                 {
-                    { 1, null, 4, null, null, null, 2, "Rufus", 1, null, null, null },
-                    { 28, null, 8, null, null, null, 2, "Marvel", 24, null, null, null },
-                    { 27, null, 9, null, null, null, 1, "Mimmi", 23, null, null, null },
-                    { 26, null, 110, null, null, null, 2, "Crawler", 22, null, null, null },
-                    { 25, null, 12, null, null, null, 1, "Gittan", 21, null, null, null },
-                    { 24, null, 14, null, null, null, 2, "Sauron", 20, null, null, null },
-                    { 23, null, 15, null, null, null, 2, "Clint", 19, null, null, null },
-                    { 22, null, 16, null, null, null, 1, "Neko", 18, null, null, null },
-                    { 21, null, 16, null, null, null, 1, "Fiffi", 17, null, null, null },
-                    { 20, null, 18, null, null, null, 1, "Ruby", 16, null, null, null },
-                    { 19, null, 19, null, null, null, 1, "Kimber", 15, null, null, null },
-                    { 18, null, 20, null, null, null, 1, "Amber", 14, null, null, null },
-                    { 17, null, 21, null, null, null, 1, "Robin", 13, null, null, null },
-                    { 16, null, 22, null, null, null, 1, "Bobo", 12, null, null, null },
-                    { 15, null, 23, null, null, null, 2, "Beppe", 11, null, null, null },
-                    { 14, null, 24, null, null, null, 2, "Bulle", 10, null, null, null },
-                    { 13, null, 3, null, null, null, 1, "Malin", 9, null, null, null },
-                    { 12, null, 3, null, null, null, 2, "Chivas", 8, null, null, null },
-                    { 11, null, 4, null, null, null, 1, "Starlight", 7, null, null, null },
-                    { 10, null, 4, null, null, null, 2, "Kurt", 7, null, null, null },
-                    { 9, null, 5, null, null, null, 2, "Kalle", 6, null, null, null },
-                    { 8, null, 6, null, null, null, 1, "Miss Diggy", 5, null, null, null },
-                    { 7, null, 7, null, null, null, 1, "Mulan", 4, null, null, null },
-                    { 6, null, 8, null, null, null, 1, "Sussi", 3, null, null, null },
-                    { 5, null, 9, null, null, null, 2, "Sneaky", 3, null, null, null },
-                    { 4, null, 10, null, null, null, 2, "Nibbler", 2, null, null, null },
-                    { 3, null, 11, null, null, null, 2, "Fluff", 2, null, null, null },
-                    { 2, null, 12, null, null, null, 1, "Lisa", 1, null, null, null },
-                    { 29, null, 7, null, null, null, 2, "Storm", 25, null, null, null },
-                    { 30, null, 6, null, null, null, 1, "Busan", 26, null, null, null }
+                    { 1, null, 4, 0, null, null, null, null, 2, "Rufus", 1, null, null, null },
+                    { 28, null, 8, 0, null, null, null, null, 2, "Marvel", 24, null, null, null },
+                    { 27, null, 9, 0, null, null, null, null, 1, "Mimmi", 23, null, null, null },
+                    { 26, null, 110, 0, null, null, null, null, 2, "Crawler", 22, null, null, null },
+                    { 25, null, 12, 0, null, null, null, null, 1, "Gittan", 21, null, null, null },
+                    { 24, null, 14, 0, null, null, null, null, 2, "Sauron", 20, null, null, null },
+                    { 23, null, 15, 0, null, null, null, null, 2, "Clint", 19, null, null, null },
+                    { 22, null, 16, 0, null, null, null, null, 1, "Neko", 18, null, null, null },
+                    { 21, null, 16, 0, null, null, null, null, 1, "Fiffi", 17, null, null, null },
+                    { 20, null, 18, 0, null, null, null, null, 1, "Ruby", 16, null, null, null },
+                    { 19, null, 19, 0, null, null, null, null, 1, "Kimber", 15, null, null, null },
+                    { 18, null, 20, 0, null, null, null, null, 1, "Amber", 14, null, null, null },
+                    { 17, null, 21, 0, null, null, null, null, 1, "Robin", 13, null, null, null },
+                    { 16, null, 22, 0, null, null, null, null, 1, "Bobo", 12, null, null, null },
+                    { 15, null, 23, 0, null, null, null, null, 2, "Beppe", 11, null, null, null },
+                    { 14, null, 24, 0, null, null, null, null, 2, "Bulle", 10, null, null, null },
+                    { 13, null, 3, 0, null, null, null, null, 1, "Malin", 9, null, null, null },
+                    { 12, null, 3, 0, null, null, null, null, 2, "Chivas", 8, null, null, null },
+                    { 11, null, 4, 0, null, null, null, null, 1, "Starlight", 7, null, null, null },
+                    { 10, null, 4, 0, null, null, null, null, 2, "Kurt", 7, null, null, null },
+                    { 9, null, 5, 0, null, null, null, null, 2, "Kalle", 6, null, null, null },
+                    { 8, null, 6, 0, null, null, null, null, 1, "Miss Diggy", 5, null, null, null },
+                    { 7, null, 7, 0, null, null, null, null, 1, "Mulan", 4, null, null, null },
+                    { 6, null, 8, 0, null, null, null, null, 1, "Sussi", 3, null, null, null },
+                    { 5, null, 9, 0, null, null, null, null, 2, "Sneaky", 3, null, null, null },
+                    { 4, null, 10, 0, null, null, null, null, 2, "Nibbler", 2, null, null, null },
+                    { 3, null, 11, 0, null, null, null, null, 2, "Fluff", 2, null, null, null },
+                    { 2, null, 12, 0, null, null, null, null, 1, "Lisa", 1, null, null, null },
+                    { 29, null, 7, 0, null, null, null, null, 2, "Storm", 25, null, null, null },
+                    { 30, null, 6, 0, null, null, null, null, 1, "Busan", 26, null, null, null }
                 });
 
             migrationBuilder.CreateIndex(

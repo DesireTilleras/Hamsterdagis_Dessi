@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading;
 using BackEnd_database;
 
+
 namespace Hamsterdagis_Dessi
 {
     public class Simulation
@@ -37,53 +38,74 @@ namespace Hamsterdagis_Dessi
         public int CountingExerciseTick { get; set; } // Den här börjar räkna när 6 nya hamstrar går in i motionsytan. 
         // När den nått till 60 ticks, så ska hamstrarna ut och 6 nya hamstrar in och då resetar den till 0 igen. 
 
+        public int CountingDaysTick { get; set; }
+
         public event EventHandler<ReportEventArgs> ReportEventHandler;
         ReportEventArgs allinfo = new ReportEventArgs();
+
+        public event EventHandler<EndOfDayEventArgs> EndOfDayReport;
+        EndOfDayEventArgs DayReport = new EndOfDayEventArgs();
 
 
         public void OnTick(Object state)
         {
-            if (CurrentAmountOfTicks <= AmountOfTicks)
+            if (AmountOfTicks > CurrentAmountOfTicks)
             {
-                CurrentAmountOfTicks++;
-                CurrentTime = SimulationStart.AddMinutes(CurrentAmountOfTicks * 6);
-                Task task1 = new Task(moveToExerciseFemales);
+                CurrentTime = CurrentTime.AddMinutes(6);
+
+                Task task1 = new Task(moveToExercise);
                 Task task2 = new Task(checkOutFromExArea);
-                Task task3 = new Task(moveToExerciseMale);
+                Task task4 = new Task(checkOutDay);
+                Task task5 = new Task(checkIn);
+                Task task6 = new Task(PutInCageFemales);
+                Task task7 = new Task(PutInCageMales);
+                Task task8 = new Task(NewDay);
+
+                CurrentAmountOfTicks++;
+
+                task5.Start();
+                task5.Wait();
+                task6.Start();
+                task6.Wait();
+
+                task7.Start();
+                task7.Wait();
+
                 task1.Start();
                 task1.Wait();
-                CountingExerciseTick++;
-                task3.Start();
-                task3.Wait();
 
-                if (CountingExerciseTick == 10)
+                task2.Start();
+                task2.Wait();
+
+                task4.Start();
+                task4.Wait();
+
+                task8.Start();
+                task8.Wait();
+
+
+                if (CurrentAmountOfTicks > AmountOfTicks)
                 {
-                    task2.Start();
-                    task2.Wait();
-                    CountingExerciseTick = 0;
+                    checkOutFromExArea();
+                    checkOutDay();
+                    ClearLoggFile();
                 }
 
-                Console.WriteLine($"{CurrentAmountOfTicks}   {CountingExerciseTick} ");
+                Console.WriteLine($"{CurrentAmountOfTicks}  {CountingDaysTick} {CurrentTime}");
             }
-         }
-        public void OnEvery60Tick(Object state)
-        {
-            //Här ska metoden som checkar ut hamstrar från exercisearea vara. 
         }
+
         public void StartSimulation(int days, int minutesOfSimulation)
         {
             SimulationStart = new DateTime(2021, 03, 26, 07, 00, 00);
-            checkIn();//Alla hamstrar checkas in och får Incheckningsdatum samt status "arrival"
-            //Sen ska hamstrarna läggas i sina burar, 3 i varje bur och de måste vara av samma kön. 
-            PutInCageFemales();
-            PutInCageMales();
+            CurrentTime = SimulationStart;
 
             AmountOfTicks = days * 100;
             float timeOfTick = (minutesOfSimulation * 60F / AmountOfTicks) * 1000F;
             TimeOfOneTick = (int)timeOfTick;
-            
-            Tick = new Timer(new TimerCallback(OnTick), null, 1000, TimeOfOneTick);
-            
+
+            Tick = new Timer(new TimerCallback(OnTick), null, 200, TimeOfOneTick);
+
             if (AmountOfTicks <= CurrentAmountOfTicks)
             {
                 Tick.Dispose();
@@ -92,110 +114,221 @@ namespace Hamsterdagis_Dessi
             }
         }
 
+        public void ClearLoggFile()
+        {
+            using (var hamsterContext = new HamsterAppContext())
+            {
+                var listOfLoggs = hamsterContext.Logg_Activities.Select(logg => logg).ToList().RemoveAll(logg => logg.Id >= 0);
+                hamsterContext.SaveChanges();
+                Console.WriteLine("Loggfile cleared");
+
+            }
+        }
+        public void NewDay()
+        {
+            if (CurrentTime.Hour == 17 && CurrentTime.Minute == 18)
+            {
+                SimulationStart = SimulationStart.AddDays(1);
+
+                using (var hamsterContext = new HamsterAppContext())
+                {
+                    hamsterContext.Hamsters.Select(hamster => hamster)
+                        .ToList()
+                        .ForEach(hamster => hamster.CheckInTime = SimulationStart);
+                    hamsterContext.SaveChanges();
+
+
+                }
+                CurrentTime = SimulationStart;
+                Console.WriteLine($"New day Day : {CurrentTime}");
+            }
+
+        }
+
+        public void checkOutDay()
+        {
+
+            using (var hamsterContext = new HamsterAppContext())
+            {
+                var listOfHamsters = hamsterContext.Hamsters.Select(hamster => hamster)
+                    .ToList();
+
+                if (CurrentTime.Hour == 17 && CurrentTime.Minute == 12 || AmountOfTicks <= CurrentAmountOfTicks)
+                {
+                    foreach (var hamster in listOfHamsters)
+                    {
+
+                        hamsterContext.Logg_Activities.Add(new Logg_Activities { Timestamp = CurrentTime, Hamster = hamster, ActivityId = 4 });
+                        hamsterContext.SaveChanges();
+
+                        hamster.ActivityId = null;
+                        hamster.CageId = null;
+                        hamster.StartTimeExercise = null;
+                        hamster.EndTimeExercise = null;
+                        hamster.TimeWaited = null;
+                        hamster.CheckInTime = null;
+                        hamster.TotalTimeWaited = null;
+                        hamster.AmountOfExercises = 0;
+                    };
+
+                    var listOfLoggs = hamsterContext.Logg_Activities.Where(logg => logg.Timestamp.Day == CurrentTime.Day)
+                        .OrderBy(x => x.HamsterId)
+                        .ThenBy(t => t.Timestamp)
+                        .ToList();
+
+                    foreach (var logg in listOfLoggs)
+                    {
+                        DayReport.Logg_Activities = logg;
+                        EndOfDayReport?.Invoke(this, DayReport);
+                    }
+
+
+                    hamsterContext.Cages.Select(cages => cages)
+                       .ToList()
+                       .ForEach(cage => cage.AmountInCage = 0);
+
+                    hamsterContext.ExerciseAreas.Select(area => area).ToList().ForEach(area => area.AmountInArea = 0);
+
+                    hamsterContext.SaveChanges();
+                    Console.WriteLine("Setting activity to null");
+
+                }
+
+            }
+
+        }
+
         public void PutInCageFemales()
         {
             using (var hamsterContext = new HamsterAppContext())
             {
-                var listOfFemales = hamsterContext.Hamsters.Where(hamster => hamster.Gender.Id == 1).ToList();
-
-                while (listOfFemales.Count != 0)
+                lock (this)
                 {
-                    var topThree = listOfFemales.OrderBy(hamster => hamster.Age).Take(3);
+                    var listOfHamsters = hamsterContext.Hamsters.Where(hamster => hamster.Gender.Id == 1)
+                               .Where(hamster => hamster.ActivityId == 1)
+                               .ToList();
 
-                    foreach (var hamster in topThree)
+                    while (listOfHamsters.Count != 0)
                     {
-                        hamster.ActivityId = 2;
+                        var topThree = listOfHamsters.OrderBy(hamster => hamster.Age).Take(3);
                         var cage = hamsterContext.Cages.Where(cage => cage.AmountInCage < 3).OrderBy(cage => cage.Id).First();
-                        cage.AmountInCage++;
-                        hamster.CageId = cage.Id;
-                        listOfFemales.Remove(hamster);
-                        hamsterContext.SaveChanges();
+
+                        foreach (var hamster in topThree)
+                        {
+                            hamster.ActivityId = 2;
+                            cage.AmountInCage++;
+                            hamster.CageId = cage.Id;
+                            listOfHamsters.Remove(hamster);
+                            hamsterContext.SaveChanges();
+
+                            hamsterContext.Logg_Activities.Add(new Logg_Activities { Timestamp = CurrentTime, Hamster = hamster, ActivityId = 2 });
+                            hamsterContext.SaveChanges();
+
+
+                        }
+
 
                     }
 
-                }
 
+                }
             }
         }
         public void PutInCageMales()
         {
             using (var hamsterContext = new HamsterAppContext())
             {
-                var listOfMales = hamsterContext.Hamsters.Where(hamster => hamster.Gender.Id == 2).ToList();
-
-                while (listOfMales.Count != 0)
+                lock (this)
                 {
-                    var topThree = listOfMales.OrderBy(hamster => hamster.Age).Take(3);
+                    var listOfHamsters = hamsterContext.Hamsters.Where(hamster => hamster.Gender.Id == 2)
+                               .Where(hamster => hamster.ActivityId == 1)
+                               .ToList();
 
-                    foreach (var hamster in topThree)
+
+
+                    while (listOfHamsters.Count != 0)
                     {
-                        hamster.ActivityId = 2;
+                        var topThree = listOfHamsters.OrderBy(hamster => hamster.Age).Take(3);
                         var cage = hamsterContext.Cages.Where(cage => cage.AmountInCage < 3).OrderBy(cage => cage.Id).First();
-                        cage.AmountInCage++;
-                        hamster.CageId = cage.Id;
-                        listOfMales.Remove(hamster);
-                        hamsterContext.SaveChanges();
 
+                        foreach (var hamster in topThree)
+                        {
+                            hamster.ActivityId = 2;
+                            cage.AmountInCage++;
+                            hamster.CageId = cage.Id;
+                            listOfHamsters.Remove(hamster);
+                            hamsterContext.SaveChanges();
+                            hamsterContext.Logg_Activities.Add(new Logg_Activities { Timestamp = CurrentTime, Hamster = hamster, ActivityId = 2 });
+                            hamsterContext.SaveChanges();
+
+                        }
                     }
-
                 }
-
             }
         }
 
         public void checkIn()
         {
-            using (var hamsterContext = new HamsterAppContext())
+            lock (this)
             {
-                hamsterContext.Hamsters.Where(hamster => hamster.Activity == null)
-                    .ToList()
-                    .ForEach(hamster => hamster.ActivityId = 1);
-                hamsterContext.SaveChanges();
+                if (CurrentTime.Hour == 7)
+                {
+                    using (var hamsterContext = new HamsterAppContext())
+                    {
+                        var notCheckedIn = hamsterContext.Hamsters.Where(hamster => hamster.ActivityId == null)
+                            .ToList();
 
-                hamsterContext.Hamsters.Where(hamster => hamster.ActivityId == 1)
-                            .ToList()
-                            .ForEach(hamster => hamster.CheckInTime = SimulationStart);
+                        foreach (var hamster in notCheckedIn)
+                        {
+                            hamster.ActivityId = 1;
+                            Console.WriteLine($"{hamster.Hamster_Name} is checked in");
+                            hamsterContext.SaveChanges();
+                            hamsterContext.Logg_Activities.Add(new Logg_Activities { Timestamp = CurrentTime, Hamster = hamster, ActivityId = 1 });
+                            hamsterContext.SaveChanges();
 
+                        }
 
-                hamsterContext.SaveChanges();
-                Console.WriteLine("All hamsterns are now checked in");
-
-                // Hamstrarna ska endast checkas in en gång??
+                    }
+                }
             }
+
         }
 
         public void checkOutFromExArea()
         {
-            // alla hamstrar som just nu är i exercisearea, ska checkas ut och amountInArea ska sättas till 0 igen. 
 
             using (var hamsterContext = new HamsterAppContext())
             {
+
                 var area = hamsterContext.ExerciseAreas.Single(area => area.AmountInArea >= 0);
                 area.AmountInArea = 0;
 
                 var listOfHamsters = hamsterContext.Hamsters.Where(hamster => hamster.ActivityId == 3)
                       .ToList();
 
-                foreach (var hamster in listOfHamsters)
+                if (listOfHamsters.Count() != 0)
                 {
-                    hamster.ActivityId = 2;
-                    if (hamster.TimeForFirstExercise == null)
-                    {
-                        hamster.TimeForFirstExercise = hamster.TimeForLastExercise;
-                        hamster.TimeWaited = CurrentTime - SimulationStart;
-                    }
-                    else
-                    {
-                        hamster.TimeWaited = hamster.TimeForFirstExercise - SimulationStart;
-                    }
-                    hamster.TimeForLastExercise = CurrentTime;
 
-                    hamsterContext.Logg_Activities.Add(new Logg_Activities { HamsterId = hamster.Id, Timestamp = CurrentTime, ActivityId = 2 });
-                    allinfo.Hamster = hamster;
-                    ReportEventHandler?.Invoke(this, allinfo);
-                    
+                    foreach (var hamster in listOfHamsters)
+                    {
+                        if (CurrentTime - hamster.StartTimeExercise >= new TimeSpan(00, 50, 00))
+                        {
+                            hamster.ActivityId = 2;
+                            hamster.EndTimeExercise = CurrentTime;
+
+                            allinfo.Hamster = hamster;
+                            ReportEventHandler?.Invoke(this, allinfo);
+
+                            hamsterContext.Logg_Activities.Add(new Logg_Activities { Timestamp = CurrentTime, Hamster = hamster, ActivityId = 2 });
+                            hamsterContext.SaveChanges();
+
+                        }
+
+
+                    }
+
                 }
-                hamsterContext.SaveChanges();
+
             }
         }
 
@@ -216,85 +349,99 @@ namespace Hamsterdagis_Dessi
             }
         }
 
-        public void moveToExerciseFemales()
-        {
-            //Gör en lista på de hamstrar som ännu inte fått motion
-            using (var hamsterContext = new HamsterAppContext())
-            {
-                if (checkIfAreaIsFree())
-                {                    
-                    var listOfFemalesNoExercise = hamsterContext.Hamsters.Where(hamster => hamster.TimeForLastExercise == null)
-                        .Where(hamster => hamster.Gender.Id == 1)
-                        .Take(6)
-                        .ToList();
-                    var listOfFemalesLastExercise = hamsterContext.Hamsters.OrderByDescending(hamster => hamster.TimeWaited)
-                        .Where(hamster => hamster.Gender.Id == 1)
-                        .Take(6 - listOfFemalesNoExercise.Count())
-                        .ToList();
-
-                    if (listOfFemalesLastExercise.Count() > 0 && listOfFemalesNoExercise.Count() < 6)
-                    {
-                        foreach (var hamster in listOfFemalesLastExercise)
-                        {
-                            listOfFemalesNoExercise.Add(hamster);
-                        }
-                    }
-
-                    var area = hamsterContext.ExerciseAreas.Single(area => area.Id == 1);
-                    area.AmountInArea = listOfFemalesNoExercise.Count();
-                    hamsterContext.SaveChanges();
-
-                    foreach (var hamster in listOfFemalesNoExercise)
-                    {
-                        hamster.ActivityId = 3;
-                        hamster.TimeForLastExercise = CurrentTime;
-                        hamsterContext.SaveChanges();
-
-                        if (hamster.TimeForFirstExercise == null)
-                        {
-                            hamster.TimeForFirstExercise = hamster.TimeForLastExercise;
-                            hamsterContext.SaveChanges();
-                        }   
-                        hamster.TimeWaited = hamster.TimeForFirstExercise- SimulationStart;
-                        hamsterContext.SaveChanges();
-                        allinfo.Hamster = hamster;
-                        ReportEventHandler?.Invoke(this, allinfo);
-
-                    }
-                    
-                }
-            }
-        }
-
-        public void moveToExerciseMale()
+        public void moveToExercise()
         {
             using (var hamsterContext = new HamsterAppContext())
             {
+
                 if (checkIfAreaIsFree())
                 {
-                    
-                    var listOfFemalesNoExercise = hamsterContext.Hamsters.Where(hamster => hamster.TimeForLastExercise == null)
-                        .Where(hamster => hamster.Gender.Id == 2)
-                        .Take(6)
-                        .ToList();
-
-                    var area = hamsterContext.ExerciseAreas.Where(area => area.Id == 1).First();
-                    area.AmountInArea = listOfFemalesNoExercise.Count();
-
-                    foreach (var hamster in listOfFemalesNoExercise)
+                    if (CurrentTime.Minute == 18 && CurrentTime.Hour < 17)
                     {
-                        hamster.ActivityId = 3;
-                        hamster.TimeForLastExercise = CurrentTime;
-                        hamsterContext.SaveChanges();
-                        allinfo.Hamster = hamster;
-                        ReportEventHandler?.Invoke(this, allinfo);
-                    }
-                }
-            }
+                         var area = hamsterContext.ExerciseAreas.Single(area => area.Id == 1);
 
+                        var listOfHamsters = hamsterContext.Hamsters.Select(h=>h)
+                            .OrderBy(hamster => hamster.AmountOfExercises)
+                            .ThenBy(hamster => hamster.Age)
+                            .ToList();
+
+                        var listOfHamstersTop6 = listOfHamsters.Where(hamster => hamster.GenderId == 1).Take(6);
+                        var listOfHamstersMalesTop6 = listOfHamsters.Where(hamster => hamster.GenderId == 2).Take(6);
+
+                        var averageExercisesFemales = listOfHamstersTop6.Average(h => h.AmountOfExercises);
+                        var averageExercisesMales = listOfHamstersMalesTop6.Average(h => h.AmountOfExercises);
+
+                        if (averageExercisesFemales < averageExercisesMales)
+                        {
+                            foreach (var hamster in listOfHamstersTop6)
+                            {
+                                area.AmountInArea++;
+
+                                hamster.StartTimeExercise = CurrentTime;
+                                hamster.ActivityId = 3;
+                                hamster.TimeWaited = new TimeSpan(00, 00, 00);
+                                hamster.AmountOfExercises++;
+
+                                if (hamster.EndTimeExercise == null)
+                                {
+                                    hamster.TimeWaited = hamster.StartTimeExercise - hamster.CheckInTime;
+                                    hamster.TotalTimeWaited = new TimeSpan(00, 00, 00);
+                                }
+                                else
+                                {
+                                    hamster.TimeWaited = hamster.StartTimeExercise - hamster.EndTimeExercise;
+                                }
+
+                                hamster.TotalTimeWaited += hamster.TimeWaited;
+                                hamsterContext.SaveChanges();
+                                allinfo.Hamster = hamster;
+                                ReportEventHandler?.Invoke(this, allinfo);
+
+                                hamsterContext.Logg_Activities.Add(new Logg_Activities { Timestamp = CurrentTime, Hamster = hamster, ActivityId = 3 });
+                                hamsterContext.SaveChanges();
+
+                            }
+                        }
+                        else
+                        {
+                            foreach (var hamster in listOfHamstersMalesTop6)
+                            {
+                                    area.AmountInArea++;
+
+                                    hamster.StartTimeExercise = CurrentTime;
+                                    hamster.ActivityId = 3;
+                                    hamster.TimeWaited = new TimeSpan(00, 00, 00);
+                                    hamster.AmountOfExercises++;
+
+                                    if (hamster.EndTimeExercise == null)
+                                    {
+                                        hamster.TimeWaited = hamster.StartTimeExercise - hamster.CheckInTime;
+                                        hamster.TotalTimeWaited = new TimeSpan(00, 00, 00);
+                                    }
+                                    else
+                                    {
+                                        hamster.TimeWaited = hamster.StartTimeExercise - hamster.EndTimeExercise;
+                                    }
+
+                                    hamster.TotalTimeWaited += hamster.TimeWaited;
+                                    hamsterContext.SaveChanges();
+                                    allinfo.Hamster = hamster;
+                                    ReportEventHandler?.Invoke(this, allinfo);
+
+                                    hamsterContext.Logg_Activities.Add(new Logg_Activities { Timestamp = CurrentTime, Hamster = hamster, ActivityId = 3 });
+                                    hamsterContext.SaveChanges();
+
+                            }
+                        }
+                        
+                    }
+ 
+                }
+
+            }
         }
 
-
+ 
     }
 }
 

@@ -19,6 +19,7 @@ namespace Hamsterdagis_Dessi
             int minutes = int.Parse(Console.ReadLine());
             
             simulation.ReportEventHandler += printToConsole.PrintReport;
+            simulation.EndOfDayReport += printToConsole.PrintEndOfDay;
             
             simulation.StartSimulation(days, minutes);
             

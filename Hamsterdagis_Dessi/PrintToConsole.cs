@@ -10,7 +10,20 @@ namespace Hamsterdagis_Dessi
     {
         public void PrintReport(object sender, ReportEventArgs args)
         {
-            Console.WriteLine($"{args.Hamster.ToString()} moved to activity : {args.Hamster.Activity.Name}");
+            lock (this)
+            {
+                Console.WriteLine($"{args.Hamster.ToString()} moved to activity : {args.Hamster.Activity.Name}");
+            }
+            
+        }
+        public void PrintEndOfDay(object sender, EndOfDayEventArgs args)
+        {
+            
+            lock (this)
+            {
+                Console.WriteLine($"{args.Logg_Activities.ToString()}");
+
+            }
         }
 
     }

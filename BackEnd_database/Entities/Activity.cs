@@ -5,17 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace BackEnd_database
-{// En aktivitet kan ha flera hamstrar
-    // En hamster kan bara ha en aktivitet åt gången
-    // En logg kan ha flera aktiviteter
-    // En aktivitet kan ha flera loggar
+{
     public class Activity
     {
         public int Id { get; set; }
         public string Name { get; set; }
         public virtual ICollection<Hamster> Hamsters { get; set; }
         public virtual ICollection<Logg_Activities> Logg_Activities { get; set; }
-
-
     }
 }

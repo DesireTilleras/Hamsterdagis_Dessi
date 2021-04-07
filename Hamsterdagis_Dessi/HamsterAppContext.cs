@@ -39,6 +39,7 @@ namespace Hamsterdagis_Dessi
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+
             modelBuilder.Seed();
         }
 
