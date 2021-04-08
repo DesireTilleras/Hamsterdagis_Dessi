@@ -21,14 +21,27 @@ namespace Hamsterdagis_Dessi
             
             lock (this)
             {
-                Console.WriteLine($"{args.Logg_Activities.ToString()}");
-
+                Console.WriteLine($"{args.Logg_Activities.ToString()} ");
+                   
             }
+        }
+        public void PrintHamsterInfo(object sender, HamsterInfoEventArgs args)
+        {
+            lock (this)
+            {
+                Console.WriteLine($"{args.Hamster.Hamster_Name} has exercised {args.Hamster.AmountOfExercises} " +
+                    $"times today and waited {args.Hamster.TimeWaited} before first exercise\n");
+            }
+
         }
 
         public void PrintTime(object sender, TimeEventArgs args)
         {
-            Console.WriteLine($"{args.CurrentTime}");
+            lock (this)
+            {
+                Console.WriteLine($"{args.CurrentTime}");
+            }
+
         }
 
     }

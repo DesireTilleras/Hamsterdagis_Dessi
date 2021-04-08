@@ -21,19 +21,19 @@ namespace BackEnd_database
             string activity = "";
             if (ActivityId == 1)
             {
-                activity = "Arrival";
+               activity =  "Arrival";
             }
             if (ActivityId == 2)
             {
-                activity = "Day Cage";
+                activity = "DayCage";
             }
             if (ActivityId == 3)
             {
-                activity = $"Exercised waited {Hamster.TimeWaited} before first exercise";
+                activity = "Exercise";
             }
             if (ActivityId == 4)
             {
-                activity = "Picked Up";
+                activity = "Pick up";
             }
 
             return $"{Hamster.Hamster_Name}  at  {Timestamp}   {activity}  ";

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using System.Threading;
 using BackEnd_database;
-
+using System.IO;
 
 namespace Hamsterdagis_Dessi
 {
@@ -39,6 +39,9 @@ namespace Hamsterdagis_Dessi
 
         public event EventHandler<TimeEventArgs> TimeReport;
         TimeEventArgs Time = new TimeEventArgs();
+
+        public event EventHandler<HamsterInfoEventArgs> HamsterInfo;
+        HamsterInfoEventArgs hamsterInfo = new HamsterInfoEventArgs();
 
 
         public void OnTick(Object state)
@@ -159,9 +162,10 @@ namespace Hamsterdagis_Dessi
                 {
                     foreach (var hamster in listOfHamsters)
                     {
-
                         hamsterContext.Logg_Activities.Add(new Logg_Activities { Timestamp = CurrentTime, Hamster = hamster, ActivityId = 4 });
                         hamsterContext.SaveChanges();
+                        hamsterInfo.Hamster = hamster;
+                        HamsterInfo?.Invoke(this, hamsterInfo);
 
                     };
 
@@ -285,8 +289,6 @@ namespace Hamsterdagis_Dessi
                             hamsterContext.SaveChanges();
                             hamsterContext.Logg_Activities.Add(new Logg_Activities { Timestamp = CurrentTime, Hamster = hamster, ActivityId = 1 });
                             hamsterContext.SaveChanges();
-                            allinfo.Hamster = hamster;
-                            ReportEventHandler?.Invoke(this, allinfo);
 
                         }
 
@@ -358,7 +360,7 @@ namespace Hamsterdagis_Dessi
 
                 if (checkIfAreaIsFree())
                 {
-                    if (CurrentTime.Minute == 18 && CurrentTime.Hour < 17)
+                    if (CurrentTime.Minute == 18 && CurrentTime.Hour < 17 && CurrentTime.Hour > 7)
                     {
                          var area = hamsterContext.ExerciseAreas.Single(area => area.Id == 1);
 
@@ -424,7 +426,7 @@ namespace Hamsterdagis_Dessi
             }
         }
 
- 
+
     }
 }
 

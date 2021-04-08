@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace Hamsterdagis_Dessi
 {
@@ -9,6 +10,7 @@ namespace Hamsterdagis_Dessi
             Simulation simulation = new Simulation();
             PrintToConsole printToConsole = new PrintToConsole();
 
+  
             Console.WriteLine("Welcome to Hamster Day Care Simulator!\n" +
                 "\nHow many days do you want to simulate?");
             int days = int.Parse(Console.ReadLine());
@@ -20,12 +22,15 @@ namespace Hamsterdagis_Dessi
             simulation.ReportEventHandler += printToConsole.PrintReport;
             simulation.EndOfDayReport += printToConsole.PrintEndOfDay;
             simulation.TimeReport += printToConsole.PrintTime;
-            
+            simulation.HamsterInfo += printToConsole.PrintHamsterInfo;
+
             simulation.StartSimulation(days, minutes);
-           
-            
+
             Console.ReadLine();
 
         }
+        
+
+        
     }
 }

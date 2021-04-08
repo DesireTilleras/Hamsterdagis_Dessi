@@ -11,6 +11,7 @@ namespace Hamsterdagis_Dessi
 {
     public static class AddingDataInTables
     {
+
         public static void Seed(this ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Owner>().HasData(
