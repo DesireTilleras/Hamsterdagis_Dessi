@@ -22,21 +22,12 @@ namespace Hamsterdagis_Dessi
         public DateTime SimulationStart { get; set; }
 
         static Timer Tick = null;
-
-        public DateTime CurrentTime { get; set; } // CurrentTime är StartTime + antal ticks * 6 min. //Om användaren väljer 3 dagar, så skall
-                                                  // det blir 300 ticks. Efter 100 ticks, så ökar datumet med en dag och klockan är 07.00 igen. 
-                                                  //Om StartTime är 2021-03-26-07-00-00, efter 100 ticks, så blir StartTime = 2021-03-27-07-00-00 osv.
-        public int AmountOfTicks { get; set; } // Ett tick är 6 min. Men efter 100 tick, så är dagen slut och StartTime blir samma fast + 1 dag. 
-        //Ticken bestäms när användaren fyller i hur många dagar som den vill att simuleringen ska ske. 
-        // 3 dagar = 300 ticks. 
-
-        public int CurrentAmountOfTicks { get; set; }// Ticken börjar på 1 och går så långt som användaren väljer. Så om det gått 10 tick, så 
-        // har det gått 6 min per tick, alltså 60 min. 
+        public DateTime CurrentTime { get; set; }
+                      
+        public int AmountOfTicks { get; set; } 
+        public int CurrentAmountOfTicks { get; set; }
 
         public int TimeOfOneTick { get; set; }
-
-        public int CountingExerciseTick { get; set; } // Den här börjar räkna när 6 nya hamstrar går in i motionsytan. 
-        // När den nått till 60 ticks, så ska hamstrarna ut och 6 nya hamstrar in och då resetar den till 0 igen. 
 
         public int CountingDaysTick { get; set; }
 
@@ -46,11 +37,17 @@ namespace Hamsterdagis_Dessi
         public event EventHandler<EndOfDayEventArgs> EndOfDayReport;
         EndOfDayEventArgs DayReport = new EndOfDayEventArgs();
 
+        public event EventHandler<TimeEventArgs> TimeReport;
+        TimeEventArgs Time = new TimeEventArgs();
+
 
         public void OnTick(Object state)
         {
             if (AmountOfTicks > CurrentAmountOfTicks)
             {
+                Time.CurrentTime = CurrentTime;
+                TimeReport?.Invoke(this, Time);
+
                 CurrentTime = CurrentTime.AddMinutes(6);
 
                 Task task1 = new Task(moveToExercise);
@@ -89,9 +86,10 @@ namespace Hamsterdagis_Dessi
                     checkOutFromExArea();
                     checkOutDay();
                     ClearLoggFile();
+
                 }
 
-                Console.WriteLine($"{CurrentAmountOfTicks}  {CountingDaysTick} {CurrentTime}");
+
             }
         }
 
@@ -118,10 +116,14 @@ namespace Hamsterdagis_Dessi
         {
             using (var hamsterContext = new HamsterAppContext())
             {
-                var listOfLoggs = hamsterContext.Logg_Activities.Select(logg => logg).ToList().RemoveAll(logg => logg.Id >= 0);
-                hamsterContext.SaveChanges();
-                Console.WriteLine("Loggfile cleared");
+                var rows = hamsterContext.Logg_Activities.Select(logg => logg).ToList();
 
+                foreach (var row in rows)
+                {
+                    hamsterContext.Logg_Activities.Remove(row);
+                }
+
+                hamsterContext.SaveChanges();
             }
         }
         public void NewDay()
@@ -129,6 +131,7 @@ namespace Hamsterdagis_Dessi
             if (CurrentTime.Hour == 17 && CurrentTime.Minute == 18)
             {
                 SimulationStart = SimulationStart.AddDays(1);
+              
 
                 using (var hamsterContext = new HamsterAppContext())
                 {
@@ -136,7 +139,6 @@ namespace Hamsterdagis_Dessi
                         .ToList()
                         .ForEach(hamster => hamster.CheckInTime = SimulationStart);
                     hamsterContext.SaveChanges();
-
 
                 }
                 CurrentTime = SimulationStart;
@@ -161,14 +163,6 @@ namespace Hamsterdagis_Dessi
                         hamsterContext.Logg_Activities.Add(new Logg_Activities { Timestamp = CurrentTime, Hamster = hamster, ActivityId = 4 });
                         hamsterContext.SaveChanges();
 
-                        hamster.ActivityId = null;
-                        hamster.CageId = null;
-                        hamster.StartTimeExercise = null;
-                        hamster.EndTimeExercise = null;
-                        hamster.TimeWaited = null;
-                        hamster.CheckInTime = null;
-                        hamster.TotalTimeWaited = null;
-                        hamster.AmountOfExercises = 0;
                     };
 
                     var listOfLoggs = hamsterContext.Logg_Activities.Where(logg => logg.Timestamp.Day == CurrentTime.Day)
@@ -181,21 +175,26 @@ namespace Hamsterdagis_Dessi
                         DayReport.Logg_Activities = logg;
                         EndOfDayReport?.Invoke(this, DayReport);
                     }
+                    hamsterContext.SaveChanges();
 
+                    foreach (var hamster in listOfHamsters)
+                    {
+                        hamster.ActivityId = null;
+                        hamster.CageId = null;
+                        hamster.StartTimeExercise = null;
+                        hamster.EndTimeExercise = null;
+                        hamster.CheckInTime = null;
+                        hamster.AmountOfExercises = 0;
+                    };
 
                     hamsterContext.Cages.Select(cages => cages)
                        .ToList()
                        .ForEach(cage => cage.AmountInCage = 0);
 
                     hamsterContext.ExerciseAreas.Select(area => area).ToList().ForEach(area => area.AmountInArea = 0);
-
                     hamsterContext.SaveChanges();
-                    Console.WriteLine("Setting activity to null");
-
                 }
-
             }
-
         }
 
         public void PutInCageFemales()
@@ -223,14 +222,12 @@ namespace Hamsterdagis_Dessi
 
                             hamsterContext.Logg_Activities.Add(new Logg_Activities { Timestamp = CurrentTime, Hamster = hamster, ActivityId = 2 });
                             hamsterContext.SaveChanges();
+                            allinfo.Hamster = hamster;
+                            ReportEventHandler?.Invoke(this, allinfo);
 
 
                         }
-
-
                     }
-
-
                 }
             }
         }
@@ -261,6 +258,8 @@ namespace Hamsterdagis_Dessi
                             hamsterContext.Logg_Activities.Add(new Logg_Activities { Timestamp = CurrentTime, Hamster = hamster, ActivityId = 2 });
                             hamsterContext.SaveChanges();
 
+                            allinfo.Hamster = hamster;
+                            ReportEventHandler?.Invoke(this, allinfo);
                         }
                     }
                 }
@@ -281,10 +280,13 @@ namespace Hamsterdagis_Dessi
                         foreach (var hamster in notCheckedIn)
                         {
                             hamster.ActivityId = 1;
-                            Console.WriteLine($"{hamster.Hamster_Name} is checked in");
+                            hamster.TimeWaited = new TimeSpan(00, 00, 00);
+                            hamster.CheckInTime = CurrentTime;
                             hamsterContext.SaveChanges();
                             hamsterContext.Logg_Activities.Add(new Logg_Activities { Timestamp = CurrentTime, Hamster = hamster, ActivityId = 1 });
                             hamsterContext.SaveChanges();
+                            allinfo.Hamster = hamster;
+                            ReportEventHandler?.Invoke(this, allinfo);
 
                         }
 
@@ -376,23 +378,13 @@ namespace Hamsterdagis_Dessi
                             foreach (var hamster in listOfHamstersTop6)
                             {
                                 area.AmountInArea++;
-
                                 hamster.StartTimeExercise = CurrentTime;
                                 hamster.ActivityId = 3;
-                                hamster.TimeWaited = new TimeSpan(00, 00, 00);
                                 hamster.AmountOfExercises++;
-
-                                if (hamster.EndTimeExercise == null)
+                                if (hamster.AmountOfExercises <= 1)
                                 {
                                     hamster.TimeWaited = hamster.StartTimeExercise - hamster.CheckInTime;
-                                    hamster.TotalTimeWaited = new TimeSpan(00, 00, 00);
                                 }
-                                else
-                                {
-                                    hamster.TimeWaited = hamster.StartTimeExercise - hamster.EndTimeExercise;
-                                }
-
-                                hamster.TotalTimeWaited += hamster.TimeWaited;
                                 hamsterContext.SaveChanges();
                                 allinfo.Hamster = hamster;
                                 ReportEventHandler?.Invoke(this, allinfo);
@@ -407,23 +399,14 @@ namespace Hamsterdagis_Dessi
                             foreach (var hamster in listOfHamstersMalesTop6)
                             {
                                     area.AmountInArea++;
-
                                     hamster.StartTimeExercise = CurrentTime;
                                     hamster.ActivityId = 3;
-                                    hamster.TimeWaited = new TimeSpan(00, 00, 00);
                                     hamster.AmountOfExercises++;
+                                if (hamster.AmountOfExercises <= 1)
+                                {
+                                    hamster.TimeWaited = hamster.StartTimeExercise - hamster.CheckInTime;
+                                }
 
-                                    if (hamster.EndTimeExercise == null)
-                                    {
-                                        hamster.TimeWaited = hamster.StartTimeExercise - hamster.CheckInTime;
-                                        hamster.TotalTimeWaited = new TimeSpan(00, 00, 00);
-                                    }
-                                    else
-                                    {
-                                        hamster.TimeWaited = hamster.StartTimeExercise - hamster.EndTimeExercise;
-                                    }
-
-                                    hamster.TotalTimeWaited += hamster.TimeWaited;
                                     hamsterContext.SaveChanges();
                                     allinfo.Hamster = hamster;
                                     ReportEventHandler?.Invoke(this, allinfo);

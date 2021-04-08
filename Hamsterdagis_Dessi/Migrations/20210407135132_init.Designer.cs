@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Hamsterdagis_Dessi.Migrations
 {
     [DbContext(typeof(HamsterAppContext))]
-    [Migration("20210407094059_Init")]
-    partial class Init
+    [Migration("20210407135132_init")]
+    partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -215,9 +215,6 @@ namespace Hamsterdagis_Dessi.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<TimeSpan?>("TimeWaited")
-                        .HasColumnType("time");
-
-                    b.Property<TimeSpan?>("TotalTimeWaited")
                         .HasColumnType("time");
 
                     b.HasKey("Id");

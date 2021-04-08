@@ -215,9 +215,6 @@ namespace Hamsterdagis_Dessi.Migrations
                     b.Property<TimeSpan?>("TimeWaited")
                         .HasColumnType("time");
 
-                    b.Property<TimeSpan?>("TotalTimeWaited")
-                        .HasColumnType("time");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ActivityId");

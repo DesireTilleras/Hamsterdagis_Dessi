@@ -19,8 +19,6 @@ namespace BackEnd_database
         public DateTime? CheckInTime { get; set; }
         public DateTime? StartTimeExercise { get; set; }
         public DateTime? EndTimeExercise { get; set; }
-        public TimeSpan? TotalTimeWaited { get; set; }
-
         public TimeSpan? TimeWaited { get; set; }
 
         public int AmountOfExercises { get; set; }

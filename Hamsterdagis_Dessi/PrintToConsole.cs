@@ -26,5 +26,10 @@ namespace Hamsterdagis_Dessi
             }
         }
 
+        public void PrintTime(object sender, TimeEventArgs args)
+        {
+            Console.WriteLine($"{args.CurrentTime}");
+        }
+
     }
 }

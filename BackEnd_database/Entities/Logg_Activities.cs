@@ -29,14 +29,14 @@ namespace BackEnd_database
             }
             if (ActivityId == 3)
             {
-                activity = "Exercised";
+                activity = $"Exercised waited {Hamster.TimeWaited} before first exercise";
             }
             if (ActivityId == 4)
             {
                 activity = "Picked Up";
             }
 
-            return $"{Hamster.Hamster_Name}  Activity:  {activity}  at  {Timestamp}";
+            return $"{Hamster.Hamster_Name}  at  {Timestamp}   {activity}  ";
         }
     }
 }
