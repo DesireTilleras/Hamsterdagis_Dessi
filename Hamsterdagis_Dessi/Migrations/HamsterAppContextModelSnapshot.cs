@@ -53,6 +53,11 @@ namespace Hamsterdagis_Dessi.Migrations
                         {
                             Id = 4,
                             Name = "PickUp"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "Spa"
                         });
                 });
 
@@ -209,6 +214,9 @@ namespace Hamsterdagis_Dessi.Migrations
                     b.Property<int>("OwnerId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("SpaAreaId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("StartTimeExercise")
                         .HasColumnType("datetime2");
 
@@ -226,6 +234,8 @@ namespace Hamsterdagis_Dessi.Migrations
                     b.HasIndex("GenderId");
 
                     b.HasIndex("OwnerId");
+
+                    b.HasIndex("SpaAreaId");
 
                     b.ToTable("Hamsters");
 
@@ -674,6 +684,21 @@ namespace Hamsterdagis_Dessi.Migrations
                         });
                 });
 
+            modelBuilder.Entity("BackEnd_database.SpaArea", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("AmountInArea")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SpaAreas");
+                });
+
             modelBuilder.Entity("BackEnd_database.Hamster", b =>
                 {
                     b.HasOne("BackEnd_database.Activity", "Activity")
@@ -699,6 +724,10 @@ namespace Hamsterdagis_Dessi.Migrations
                         .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("BackEnd_database.SpaArea", null)
+                        .WithMany("Hamsters")
+                        .HasForeignKey("SpaAreaId");
 
                     b.Navigation("Activity");
 
@@ -752,6 +781,11 @@ namespace Hamsterdagis_Dessi.Migrations
                 });
 
             modelBuilder.Entity("BackEnd_database.Owner", b =>
+                {
+                    b.Navigation("Hamsters");
+                });
+
+            modelBuilder.Entity("BackEnd_database.SpaArea", b =>
                 {
                     b.Navigation("Hamsters");
                 });

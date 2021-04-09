@@ -63,13 +63,14 @@ namespace Hamsterdagis_Dessi
                 new Activity {Id = 1, Name = "Arrival"},
                 new Activity {Id = 2, Name = "DayCage"},
                 new Activity {Id = 3, Name = "Exercise"},
-                new Activity {Id = 4, Name = "PickUp" }
+                new Activity {Id = 4, Name = "PickUp" },
+                new Activity {Id = 5, Name = "Spa" }
                 );
 
             modelBuilder.Entity<ExerciseArea>().HasData(
                 new ExerciseArea { Id = 1, AmountInArea = 0});
 
-            string[] csvLines = File.ReadAllLines(@"C:\Users\desir\Documents\Avancerad.Net\TENTA\Tentan\Hamsterdagis_Dessi\Hamsterlista30.csv");
+            string[] csvLines = File.ReadAllLines("Hamsterlista30.csv");
 
             for (int i = 1; i < csvLines.Length; i++)
             {

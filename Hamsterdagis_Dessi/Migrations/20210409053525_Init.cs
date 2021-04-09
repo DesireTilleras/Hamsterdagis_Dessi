@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Hamsterdagis_Dessi.Migrations
 {
-    public partial class init : Migration
+    public partial class Init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -73,6 +73,19 @@ namespace Hamsterdagis_Dessi.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "SpaAreas",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    AmountInArea = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SpaAreas", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Hamsters",
                 columns: table => new
                 {
@@ -89,7 +102,8 @@ namespace Hamsterdagis_Dessi.Migrations
                     EndTimeExercise = table.Column<DateTime>(type: "datetime2", nullable: true),
                     TimeWaited = table.Column<TimeSpan>(type: "time", nullable: true),
                     AmountOfExercises = table.Column<int>(type: "int", nullable: false),
-                    ExerciseAreaId = table.Column<int>(type: "int", nullable: true)
+                    ExerciseAreaId = table.Column<int>(type: "int", nullable: true),
+                    SpaAreaId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -124,6 +138,12 @@ namespace Hamsterdagis_Dessi.Migrations
                         principalTable: "Owners",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Hamsters_SpaAreas_SpaAreaId",
+                        column: x => x.SpaAreaId,
+                        principalTable: "SpaAreas",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -161,7 +181,8 @@ namespace Hamsterdagis_Dessi.Migrations
                     { 1, "Arrival" },
                     { 2, "DayCage" },
                     { 3, "Exercise" },
-                    { 4, "PickUp" }
+                    { 4, "PickUp" },
+                    { 5, "Spa" }
                 });
 
             migrationBuilder.InsertData(
@@ -169,16 +190,16 @@ namespace Hamsterdagis_Dessi.Migrations
                 columns: new[] { "Id", "AmountInCage" },
                 values: new object[,]
                 {
-                    { 1, 0 },
-                    { 2, 0 },
-                    { 3, 0 },
-                    { 4, 0 },
-                    { 5, 0 },
-                    { 6, 0 },
-                    { 7, 0 },
-                    { 8, 0 },
                     { 9, 0 },
-                    { 10, 0 }
+                    { 8, 0 },
+                    { 7, 0 },
+                    { 6, 0 },
+                    { 10, 0 },
+                    { 4, 0 },
+                    { 3, 0 },
+                    { 2, 0 },
+                    { 1, 0 },
+                    { 5, 0 }
                 });
 
             migrationBuilder.InsertData(
@@ -200,32 +221,36 @@ namespace Hamsterdagis_Dessi.Migrations
                 columns: new[] { "Id", "Name" },
                 values: new object[,]
                 {
-                    { 24, "Anna Linström" },
-                    { 23, "Mia Eriksson" },
-                    { 22, "Carita Gran" },
-                    { 21, "Hans Björk" },
-                    { 20, "Anna Al" },
-                    { 19, "Bo Ek" },
-                    { 18, "Pia Hansson" },
-                    { 17, "GW Hansson" },
-                    { 16, "Mindy Mendel" },
                     { 15, "Mork of Ork" },
+                    { 16, "Mindy Mendel" },
+                    { 17, "GW Hansson" },
+                    { 18, "Pia Hansson" },
+                    { 19, "Bo Ek" },
+                    { 23, "Mia Eriksson" },
+                    { 21, "Hans Björk" },
+                    { 22, "Carita Gran" },
+                    { 24, "Anna Linström" },
                     { 14, "Kim Carnes" },
+                    { 20, "Anna Al" },
                     { 13, "Bette Davis" },
-                    { 5, "Ottilla Murkwood" },
+                    { 4, "Jan Hallgren" },
                     { 11, "Bobby Ewing" },
                     { 10, "Lorenzo Lamas" },
                     { 9, "Bianca Ingrosso" },
                     { 8, "Pernilla Wahlgren" },
                     { 7, "Anna Book" },
                     { 6, "Anfers Murkwood" },
+                    { 5, "Ottilla Murkwood" },
                     { 25, "Lennart Berg" },
-                    { 4, "Jan Hallgren" },
                     { 3, "Lisa Nilsson" },
                     { 2, "Carl Hamilton" },
-                    { 1, "Kallegurra Aktersnurra" },
-                    { 12, "Hedy Lamar" }
+                    { 1, "Kallegurra Aktersnurra" }
                 });
+
+            migrationBuilder.InsertData(
+                table: "Owners",
+                columns: new[] { "Id", "Name" },
+                values: new object[] { 12, "Hedy Lamar" });
 
             migrationBuilder.InsertData(
                 table: "Owners",
@@ -234,39 +259,39 @@ namespace Hamsterdagis_Dessi.Migrations
 
             migrationBuilder.InsertData(
                 table: "Hamsters",
-                columns: new[] { "Id", "ActivityId", "Age", "AmountOfExercises", "CageId", "CheckInTime", "EndTimeExercise", "ExerciseAreaId", "GenderId", "Hamster_Name", "OwnerId", "StartTimeExercise", "TimeWaited" },
+                columns: new[] { "Id", "ActivityId", "Age", "AmountOfExercises", "CageId", "CheckInTime", "EndTimeExercise", "ExerciseAreaId", "GenderId", "Hamster_Name", "OwnerId", "SpaAreaId", "StartTimeExercise", "TimeWaited" },
                 values: new object[,]
                 {
-                    { 1, null, 4, 0, null, null, null, null, 2, "Rufus", 1, null, null },
-                    { 28, null, 8, 0, null, null, null, null, 2, "Marvel", 24, null, null },
-                    { 27, null, 9, 0, null, null, null, null, 1, "Mimmi", 23, null, null },
-                    { 26, null, 110, 0, null, null, null, null, 2, "Crawler", 22, null, null },
-                    { 25, null, 12, 0, null, null, null, null, 1, "Gittan", 21, null, null },
-                    { 24, null, 14, 0, null, null, null, null, 2, "Sauron", 20, null, null },
-                    { 23, null, 15, 0, null, null, null, null, 2, "Clint", 19, null, null },
-                    { 22, null, 16, 0, null, null, null, null, 1, "Neko", 18, null, null },
-                    { 21, null, 16, 0, null, null, null, null, 1, "Fiffi", 17, null, null },
-                    { 20, null, 18, 0, null, null, null, null, 1, "Ruby", 16, null, null },
-                    { 19, null, 19, 0, null, null, null, null, 1, "Kimber", 15, null, null },
-                    { 18, null, 20, 0, null, null, null, null, 1, "Amber", 14, null, null },
-                    { 17, null, 21, 0, null, null, null, null, 1, "Robin", 13, null, null },
-                    { 16, null, 22, 0, null, null, null, null, 1, "Bobo", 12, null, null },
-                    { 15, null, 23, 0, null, null, null, null, 2, "Beppe", 11, null, null },
-                    { 14, null, 24, 0, null, null, null, null, 2, "Bulle", 10, null, null },
-                    { 13, null, 3, 0, null, null, null, null, 1, "Malin", 9, null, null },
-                    { 12, null, 3, 0, null, null, null, null, 2, "Chivas", 8, null, null },
-                    { 11, null, 4, 0, null, null, null, null, 1, "Starlight", 7, null, null },
-                    { 10, null, 4, 0, null, null, null, null, 2, "Kurt", 7, null, null },
-                    { 9, null, 5, 0, null, null, null, null, 2, "Kalle", 6, null, null },
-                    { 8, null, 6, 0, null, null, null, null, 1, "Miss Diggy", 5, null, null },
-                    { 7, null, 7, 0, null, null, null, null, 1, "Mulan", 4, null, null },
-                    { 6, null, 8, 0, null, null, null, null, 1, "Sussi", 3, null, null },
-                    { 5, null, 9, 0, null, null, null, null, 2, "Sneaky", 3, null, null },
-                    { 4, null, 10, 0, null, null, null, null, 2, "Nibbler", 2, null, null },
-                    { 3, null, 11, 0, null, null, null, null, 2, "Fluff", 2, null, null },
-                    { 2, null, 12, 0, null, null, null, null, 1, "Lisa", 1, null, null },
-                    { 29, null, 7, 0, null, null, null, null, 2, "Storm", 25, null, null },
-                    { 30, null, 6, 0, null, null, null, null, 1, "Busan", 26, null, null }
+                    { 1, null, 4, 0, null, null, null, null, 2, "Rufus", 1, null, null, null },
+                    { 28, null, 8, 0, null, null, null, null, 2, "Marvel", 24, null, null, null },
+                    { 27, null, 9, 0, null, null, null, null, 1, "Mimmi", 23, null, null, null },
+                    { 26, null, 110, 0, null, null, null, null, 2, "Crawler", 22, null, null, null },
+                    { 25, null, 12, 0, null, null, null, null, 1, "Gittan", 21, null, null, null },
+                    { 24, null, 14, 0, null, null, null, null, 2, "Sauron", 20, null, null, null },
+                    { 23, null, 15, 0, null, null, null, null, 2, "Clint", 19, null, null, null },
+                    { 22, null, 16, 0, null, null, null, null, 1, "Neko", 18, null, null, null },
+                    { 21, null, 16, 0, null, null, null, null, 1, "Fiffi", 17, null, null, null },
+                    { 20, null, 18, 0, null, null, null, null, 1, "Ruby", 16, null, null, null },
+                    { 19, null, 19, 0, null, null, null, null, 1, "Kimber", 15, null, null, null },
+                    { 18, null, 20, 0, null, null, null, null, 1, "Amber", 14, null, null, null },
+                    { 17, null, 21, 0, null, null, null, null, 1, "Robin", 13, null, null, null },
+                    { 16, null, 22, 0, null, null, null, null, 1, "Bobo", 12, null, null, null },
+                    { 15, null, 23, 0, null, null, null, null, 2, "Beppe", 11, null, null, null },
+                    { 14, null, 24, 0, null, null, null, null, 2, "Bulle", 10, null, null, null },
+                    { 13, null, 3, 0, null, null, null, null, 1, "Malin", 9, null, null, null },
+                    { 12, null, 3, 0, null, null, null, null, 2, "Chivas", 8, null, null, null },
+                    { 11, null, 4, 0, null, null, null, null, 1, "Starlight", 7, null, null, null },
+                    { 10, null, 4, 0, null, null, null, null, 2, "Kurt", 7, null, null, null },
+                    { 9, null, 5, 0, null, null, null, null, 2, "Kalle", 6, null, null, null },
+                    { 8, null, 6, 0, null, null, null, null, 1, "Miss Diggy", 5, null, null, null },
+                    { 7, null, 7, 0, null, null, null, null, 1, "Mulan", 4, null, null, null },
+                    { 6, null, 8, 0, null, null, null, null, 1, "Sussi", 3, null, null, null },
+                    { 5, null, 9, 0, null, null, null, null, 2, "Sneaky", 3, null, null, null },
+                    { 4, null, 10, 0, null, null, null, null, 2, "Nibbler", 2, null, null, null },
+                    { 3, null, 11, 0, null, null, null, null, 2, "Fluff", 2, null, null, null },
+                    { 2, null, 12, 0, null, null, null, null, 1, "Lisa", 1, null, null, null },
+                    { 29, null, 7, 0, null, null, null, null, 2, "Storm", 25, null, null, null },
+                    { 30, null, 6, 0, null, null, null, null, 1, "Busan", 26, null, null, null }
                 });
 
             migrationBuilder.CreateIndex(
@@ -293,6 +318,11 @@ namespace Hamsterdagis_Dessi.Migrations
                 name: "IX_Hamsters_OwnerId",
                 table: "Hamsters",
                 column: "OwnerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Hamsters_SpaAreaId",
+                table: "Hamsters",
+                column: "SpaAreaId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Logg_Activities_ActivityId",
@@ -327,6 +357,9 @@ namespace Hamsterdagis_Dessi.Migrations
 
             migrationBuilder.DropTable(
                 name: "Owners");
+
+            migrationBuilder.DropTable(
+                name: "SpaAreas");
         }
     }
 }

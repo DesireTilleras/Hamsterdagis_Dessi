@@ -18,6 +18,7 @@ namespace Hamsterdagis_Dessi
         public DbSet<ExerciseArea> ExerciseAreas { get; set; }
         public DbSet<Activity> Activities { get; set; }
         public DbSet<Logg_Activities> Logg_Activities { get; set; }
+        public DbSet<SpaArea> SpaAreas { get; set; }
 
         public HamsterAppContext()
         {

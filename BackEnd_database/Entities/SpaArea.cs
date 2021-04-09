@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace BackEnd_database
-{ 
-    public class ExerciseArea
+{
+    public class SpaArea
     {
         public int Id { get; set; }
         public int AmountInArea { get; set; }

@@ -8,7 +8,6 @@ namespace Hamsterdagis_Dessi
 {
     public class TimeEventArgs:EventArgs
     {
-
         public DateTime CurrentTime { get; set; }
     }
 }

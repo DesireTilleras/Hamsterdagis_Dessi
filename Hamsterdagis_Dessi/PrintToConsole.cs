@@ -32,7 +32,6 @@ namespace Hamsterdagis_Dessi
                 Console.WriteLine($"{args.Hamster.Hamster_Name} has exercised {args.Hamster.AmountOfExercises} " +
                     $"times today and waited {args.Hamster.TimeWaited} before first exercise\n");
             }
-
         }
 
         public void PrintTime(object sender, TimeEventArgs args)
@@ -41,8 +40,6 @@ namespace Hamsterdagis_Dessi
             {
                 Console.WriteLine($"{args.CurrentTime}");
             }
-
         }
-
     }
 }

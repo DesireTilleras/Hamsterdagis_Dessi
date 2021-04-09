@@ -31,6 +31,8 @@ namespace Hamsterdagis_Dessi
 
         public int CountingDaysTick { get; set; }
 
+        public bool IsRunning { get; set; }
+
         public event EventHandler<ReportEventArgs> ReportEventHandler;
         ReportEventArgs allinfo = new ReportEventArgs();
 
@@ -44,55 +46,24 @@ namespace Hamsterdagis_Dessi
         HamsterInfoEventArgs hamsterInfo = new HamsterInfoEventArgs();
 
 
-        public void OnTick(Object state)
+        public async void OnTick(Object state)
         {
-            if (AmountOfTicks > CurrentAmountOfTicks)
+            if (AmountOfTicks >= CurrentAmountOfTicks)
             {
                 Time.CurrentTime = CurrentTime;
                 TimeReport?.Invoke(this, Time);
 
                 CurrentTime = CurrentTime.AddMinutes(6);
 
-                Task task1 = new Task(moveToExercise);
-                Task task2 = new Task(checkOutFromExArea);
-                Task task4 = new Task(checkOutDay);
-                Task task5 = new Task(checkIn);
-                Task task6 = new Task(PutInCageFemales);
-                Task task7 = new Task(PutInCageMales);
-                Task task8 = new Task(NewDay);
+                await Task.Run(() => moveToExercise());
+                await Task.Run(() => checkOutFromExArea());
+                await Task.Run(() => checkOutDay());
+                await Task.Run(() => checkIn());
+                await Task.Run(() => PutInCageFemales());
+                await Task.Run(() => PutInCageMales());
+                await Task.Run(() => NewDay());
 
                 CurrentAmountOfTicks++;
-
-                task5.Start();
-                task5.Wait();
-                task6.Start();
-                task6.Wait();
-
-                task7.Start();
-                task7.Wait();
-
-                task1.Start();
-                task1.Wait();
-
-                task2.Start();
-                task2.Wait();
-
-                task4.Start();
-                task4.Wait();
-
-                task8.Start();
-                task8.Wait();
-
-
-                if (CurrentAmountOfTicks > AmountOfTicks)
-                {
-                    checkOutFromExArea();
-                    checkOutDay();
-                    ClearLoggFile();
-
-                }
-
-
             }
         }
 
@@ -110,7 +81,6 @@ namespace Hamsterdagis_Dessi
             if (AmountOfTicks <= CurrentAmountOfTicks)
             {
                 Tick.Dispose();
-                Console.WriteLine("End");
 
             }
         }
@@ -135,7 +105,6 @@ namespace Hamsterdagis_Dessi
             {
                 SimulationStart = SimulationStart.AddDays(1);
               
-
                 using (var hamsterContext = new HamsterAppContext())
                 {
                     hamsterContext.Hamsters.Select(hamster => hamster)
@@ -145,9 +114,7 @@ namespace Hamsterdagis_Dessi
 
                 }
                 CurrentTime = SimulationStart;
-                Console.WriteLine($"New day Day : {CurrentTime}");
-            }
-
+             }
         }
 
         public void checkOutDay()
@@ -426,6 +393,33 @@ namespace Hamsterdagis_Dessi
             }
         }
 
+        internal void Pause()
+        {
+            if (AmountOfTicks > CurrentAmountOfTicks)
+            {
+                if (IsRunning)
+                {
+                    IsRunning = false;
+                    Console.WriteLine("Paused, Press any key to continue");
+                    Tick.Change(Timeout.Infinite, Timeout.Infinite);
+                }
+                else
+                {
+                    IsRunning = true;
+                    Console.WriteLine("Resuming simulation");
+                    Tick.Change(1000, TimeOfOneTick);
+                }
+            }
+            else
+            {
+                ConsoleKey input = ConsoleKey.Enter;
+                if (input== ConsoleKey.Enter)
+                {
+                    Environment.Exit(0);
+                }
+            }
+           
+        }
 
     }
 }

@@ -18,19 +18,28 @@ namespace Hamsterdagis_Dessi
             Console.WriteLine("How long do you want the simulation to take? Please answer in whole minutes : ");
             int minutes = int.Parse(Console.ReadLine());
             simulation.ClearLoggFile();
-            
             simulation.ReportEventHandler += printToConsole.PrintReport;
             simulation.EndOfDayReport += printToConsole.PrintEndOfDay;
             simulation.TimeReport += printToConsole.PrintTime;
             simulation.HamsterInfo += printToConsole.PrintHamsterInfo;
 
             simulation.StartSimulation(days, minutes);
+            PauseOrExit(simulation);
 
             Console.ReadLine();
 
         }
-        
 
-        
+        private static void PauseOrExit(Simulation simulation)
+        {
+            ConsoleKey input = ConsoleKey.Enter;
+
+            while (input != ConsoleKey.Escape)
+            {
+                input = Console.ReadKey().Key;
+                simulation.Pause();
+            }
+
+        }
     }
 }
