@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Hamsterdagis_Dessi.Migrations
 {
     [DbContext(typeof(HamsterAppContext))]
-    [Migration("20210409053525_Init")]
-    partial class Init
+    [Migration("20210409091813_init")]
+    partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -195,6 +195,9 @@ namespace Hamsterdagis_Dessi.Migrations
                     b.Property<int>("AmountOfExercises")
                         .HasColumnType("int");
 
+                    b.Property<int>("AmountOfSpaVisits")
+                        .HasColumnType("int");
+
                     b.Property<int?>("CageId")
                         .HasColumnType("int");
 
@@ -222,6 +225,9 @@ namespace Hamsterdagis_Dessi.Migrations
                     b.Property<DateTime?>("StartTimeExercise")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("StartTimeSpa")
+                        .HasColumnType("datetime2");
+
                     b.Property<TimeSpan?>("TimeWaited")
                         .HasColumnType("time");
 
@@ -247,6 +253,7 @@ namespace Hamsterdagis_Dessi.Migrations
                             Id = 1,
                             Age = 4,
                             AmountOfExercises = 0,
+                            AmountOfSpaVisits = 0,
                             GenderId = 2,
                             Hamster_Name = "Rufus",
                             OwnerId = 1
@@ -256,6 +263,7 @@ namespace Hamsterdagis_Dessi.Migrations
                             Id = 2,
                             Age = 12,
                             AmountOfExercises = 0,
+                            AmountOfSpaVisits = 0,
                             GenderId = 1,
                             Hamster_Name = "Lisa",
                             OwnerId = 1
@@ -265,6 +273,7 @@ namespace Hamsterdagis_Dessi.Migrations
                             Id = 3,
                             Age = 11,
                             AmountOfExercises = 0,
+                            AmountOfSpaVisits = 0,
                             GenderId = 2,
                             Hamster_Name = "Fluff",
                             OwnerId = 2
@@ -274,6 +283,7 @@ namespace Hamsterdagis_Dessi.Migrations
                             Id = 4,
                             Age = 10,
                             AmountOfExercises = 0,
+                            AmountOfSpaVisits = 0,
                             GenderId = 2,
                             Hamster_Name = "Nibbler",
                             OwnerId = 2
@@ -283,6 +293,7 @@ namespace Hamsterdagis_Dessi.Migrations
                             Id = 5,
                             Age = 9,
                             AmountOfExercises = 0,
+                            AmountOfSpaVisits = 0,
                             GenderId = 2,
                             Hamster_Name = "Sneaky",
                             OwnerId = 3
@@ -292,6 +303,7 @@ namespace Hamsterdagis_Dessi.Migrations
                             Id = 6,
                             Age = 8,
                             AmountOfExercises = 0,
+                            AmountOfSpaVisits = 0,
                             GenderId = 1,
                             Hamster_Name = "Sussi",
                             OwnerId = 3
@@ -301,6 +313,7 @@ namespace Hamsterdagis_Dessi.Migrations
                             Id = 7,
                             Age = 7,
                             AmountOfExercises = 0,
+                            AmountOfSpaVisits = 0,
                             GenderId = 1,
                             Hamster_Name = "Mulan",
                             OwnerId = 4
@@ -310,6 +323,7 @@ namespace Hamsterdagis_Dessi.Migrations
                             Id = 8,
                             Age = 6,
                             AmountOfExercises = 0,
+                            AmountOfSpaVisits = 0,
                             GenderId = 1,
                             Hamster_Name = "Miss Diggy",
                             OwnerId = 5
@@ -319,6 +333,7 @@ namespace Hamsterdagis_Dessi.Migrations
                             Id = 9,
                             Age = 5,
                             AmountOfExercises = 0,
+                            AmountOfSpaVisits = 0,
                             GenderId = 2,
                             Hamster_Name = "Kalle",
                             OwnerId = 6
@@ -328,6 +343,7 @@ namespace Hamsterdagis_Dessi.Migrations
                             Id = 10,
                             Age = 4,
                             AmountOfExercises = 0,
+                            AmountOfSpaVisits = 0,
                             GenderId = 2,
                             Hamster_Name = "Kurt",
                             OwnerId = 7
@@ -337,6 +353,7 @@ namespace Hamsterdagis_Dessi.Migrations
                             Id = 11,
                             Age = 4,
                             AmountOfExercises = 0,
+                            AmountOfSpaVisits = 0,
                             GenderId = 1,
                             Hamster_Name = "Starlight",
                             OwnerId = 7
@@ -346,6 +363,7 @@ namespace Hamsterdagis_Dessi.Migrations
                             Id = 12,
                             Age = 3,
                             AmountOfExercises = 0,
+                            AmountOfSpaVisits = 0,
                             GenderId = 2,
                             Hamster_Name = "Chivas",
                             OwnerId = 8
@@ -355,6 +373,7 @@ namespace Hamsterdagis_Dessi.Migrations
                             Id = 13,
                             Age = 3,
                             AmountOfExercises = 0,
+                            AmountOfSpaVisits = 0,
                             GenderId = 1,
                             Hamster_Name = "Malin",
                             OwnerId = 9
@@ -364,6 +383,7 @@ namespace Hamsterdagis_Dessi.Migrations
                             Id = 14,
                             Age = 24,
                             AmountOfExercises = 0,
+                            AmountOfSpaVisits = 0,
                             GenderId = 2,
                             Hamster_Name = "Bulle",
                             OwnerId = 10
@@ -373,6 +393,7 @@ namespace Hamsterdagis_Dessi.Migrations
                             Id = 15,
                             Age = 23,
                             AmountOfExercises = 0,
+                            AmountOfSpaVisits = 0,
                             GenderId = 2,
                             Hamster_Name = "Beppe",
                             OwnerId = 11
@@ -382,6 +403,7 @@ namespace Hamsterdagis_Dessi.Migrations
                             Id = 16,
                             Age = 22,
                             AmountOfExercises = 0,
+                            AmountOfSpaVisits = 0,
                             GenderId = 1,
                             Hamster_Name = "Bobo",
                             OwnerId = 12
@@ -391,6 +413,7 @@ namespace Hamsterdagis_Dessi.Migrations
                             Id = 17,
                             Age = 21,
                             AmountOfExercises = 0,
+                            AmountOfSpaVisits = 0,
                             GenderId = 1,
                             Hamster_Name = "Robin",
                             OwnerId = 13
@@ -400,6 +423,7 @@ namespace Hamsterdagis_Dessi.Migrations
                             Id = 18,
                             Age = 20,
                             AmountOfExercises = 0,
+                            AmountOfSpaVisits = 0,
                             GenderId = 1,
                             Hamster_Name = "Amber",
                             OwnerId = 14
@@ -409,6 +433,7 @@ namespace Hamsterdagis_Dessi.Migrations
                             Id = 19,
                             Age = 19,
                             AmountOfExercises = 0,
+                            AmountOfSpaVisits = 0,
                             GenderId = 1,
                             Hamster_Name = "Kimber",
                             OwnerId = 15
@@ -418,6 +443,7 @@ namespace Hamsterdagis_Dessi.Migrations
                             Id = 20,
                             Age = 18,
                             AmountOfExercises = 0,
+                            AmountOfSpaVisits = 0,
                             GenderId = 1,
                             Hamster_Name = "Ruby",
                             OwnerId = 16
@@ -427,6 +453,7 @@ namespace Hamsterdagis_Dessi.Migrations
                             Id = 21,
                             Age = 16,
                             AmountOfExercises = 0,
+                            AmountOfSpaVisits = 0,
                             GenderId = 1,
                             Hamster_Name = "Fiffi",
                             OwnerId = 17
@@ -436,6 +463,7 @@ namespace Hamsterdagis_Dessi.Migrations
                             Id = 22,
                             Age = 16,
                             AmountOfExercises = 0,
+                            AmountOfSpaVisits = 0,
                             GenderId = 1,
                             Hamster_Name = "Neko",
                             OwnerId = 18
@@ -445,6 +473,7 @@ namespace Hamsterdagis_Dessi.Migrations
                             Id = 23,
                             Age = 15,
                             AmountOfExercises = 0,
+                            AmountOfSpaVisits = 0,
                             GenderId = 2,
                             Hamster_Name = "Clint",
                             OwnerId = 19
@@ -454,6 +483,7 @@ namespace Hamsterdagis_Dessi.Migrations
                             Id = 24,
                             Age = 14,
                             AmountOfExercises = 0,
+                            AmountOfSpaVisits = 0,
                             GenderId = 2,
                             Hamster_Name = "Sauron",
                             OwnerId = 20
@@ -463,6 +493,7 @@ namespace Hamsterdagis_Dessi.Migrations
                             Id = 25,
                             Age = 12,
                             AmountOfExercises = 0,
+                            AmountOfSpaVisits = 0,
                             GenderId = 1,
                             Hamster_Name = "Gittan",
                             OwnerId = 21
@@ -472,6 +503,7 @@ namespace Hamsterdagis_Dessi.Migrations
                             Id = 26,
                             Age = 110,
                             AmountOfExercises = 0,
+                            AmountOfSpaVisits = 0,
                             GenderId = 2,
                             Hamster_Name = "Crawler",
                             OwnerId = 22
@@ -481,6 +513,7 @@ namespace Hamsterdagis_Dessi.Migrations
                             Id = 27,
                             Age = 9,
                             AmountOfExercises = 0,
+                            AmountOfSpaVisits = 0,
                             GenderId = 1,
                             Hamster_Name = "Mimmi",
                             OwnerId = 23
@@ -490,6 +523,7 @@ namespace Hamsterdagis_Dessi.Migrations
                             Id = 28,
                             Age = 8,
                             AmountOfExercises = 0,
+                            AmountOfSpaVisits = 0,
                             GenderId = 2,
                             Hamster_Name = "Marvel",
                             OwnerId = 24
@@ -499,6 +533,7 @@ namespace Hamsterdagis_Dessi.Migrations
                             Id = 29,
                             Age = 7,
                             AmountOfExercises = 0,
+                            AmountOfSpaVisits = 0,
                             GenderId = 2,
                             Hamster_Name = "Storm",
                             OwnerId = 25
@@ -508,6 +543,7 @@ namespace Hamsterdagis_Dessi.Migrations
                             Id = 30,
                             Age = 6,
                             AmountOfExercises = 0,
+                            AmountOfSpaVisits = 0,
                             GenderId = 1,
                             Hamster_Name = "Busan",
                             OwnerId = 26
@@ -699,6 +735,13 @@ namespace Hamsterdagis_Dessi.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("SpaAreas");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            AmountInArea = 0
+                        });
                 });
 
             modelBuilder.Entity("BackEnd_database.Hamster", b =>

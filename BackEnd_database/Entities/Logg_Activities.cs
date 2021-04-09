@@ -35,6 +35,10 @@ namespace BackEnd_database
             {
                 activity = "Pick up";
             }
+            if (ActivityId == 5)
+            {
+                activity = "Spa";
+            }
 
             return $"{Hamster.Hamster_Name}  at  {Timestamp}   {activity}  ";
         }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.IO;
 
 namespace Hamsterdagis_Dessi
@@ -7,6 +8,10 @@ namespace Hamsterdagis_Dessi
     {
         static void Main(string[] args)
         {
+            using (var hamsterContext = new HamsterAppContext())
+            {
+                hamsterContext.Database.Migrate();
+            }
             Simulation simulation = new Simulation();
             PrintToConsole printToConsole = new PrintToConsole();
 
@@ -34,12 +39,11 @@ namespace Hamsterdagis_Dessi
         {
             ConsoleKey input = ConsoleKey.Enter;
 
-            while (input != ConsoleKey.Escape)
+            while (input == ConsoleKey.Enter)
             {
-                input = Console.ReadKey().Key;
                 simulation.Pause();
+                input = Console.ReadKey().Key;
             }
-
         }
     }
 }

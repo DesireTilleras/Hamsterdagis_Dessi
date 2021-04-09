@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading;
 using BackEnd_database;
 using System.IO;
+using Microsoft.EntityFrameworkCore;
 
 namespace Hamsterdagis_Dessi
 {
@@ -55,10 +56,12 @@ namespace Hamsterdagis_Dessi
 
                 CurrentTime = CurrentTime.AddMinutes(6);
 
-                await Task.Run(() => moveToExercise());
-                await Task.Run(() => checkOutFromExArea());
-                await Task.Run(() => checkOutDay());
-                await Task.Run(() => checkIn());
+                await Task.Run(() => MoveToExercise());
+                await Task.Run(() => MoveToSpa());
+                await Task.Run(() => CheckOutFromExArea());
+                await Task.Run(() => CheckOutFromSpaArea());
+                await Task.Run(() => CheckOutDay());
+                await Task.Run(() => CheckIn());
                 await Task.Run(() => PutInCageFemales());
                 await Task.Run(() => PutInCageMales());
                 await Task.Run(() => NewDay());
@@ -69,6 +72,7 @@ namespace Hamsterdagis_Dessi
 
         public void StartSimulation(int days, int minutesOfSimulation)
         {
+
             SimulationStart = new DateTime(2021, 03, 26, 07, 00, 00);
             CurrentTime = SimulationStart;
 
@@ -117,7 +121,7 @@ namespace Hamsterdagis_Dessi
              }
         }
 
-        public void checkOutDay()
+        public void CheckOutDay()
         {
 
             using (var hamsterContext = new HamsterAppContext())
@@ -155,7 +159,9 @@ namespace Hamsterdagis_Dessi
                         hamster.StartTimeExercise = null;
                         hamster.EndTimeExercise = null;
                         hamster.CheckInTime = null;
+                        hamster.StartTimeSpa = null;
                         hamster.AmountOfExercises = 0;
+                        hamster.AmountOfSpaVisits = 0;
                     };
 
                     hamsterContext.Cages.Select(cages => cages)
@@ -163,6 +169,8 @@ namespace Hamsterdagis_Dessi
                        .ForEach(cage => cage.AmountInCage = 0);
 
                     hamsterContext.ExerciseAreas.Select(area => area).ToList().ForEach(area => area.AmountInArea = 0);
+                    hamsterContext.SpaAreas.Select(area => area).ToList().ForEach(area => area.AmountInArea = 0);
+
                     hamsterContext.SaveChanges();
                 }
             }
@@ -237,7 +245,7 @@ namespace Hamsterdagis_Dessi
             }
         }
 
-        public void checkIn()
+        public void CheckIn()
         {
             lock (this)
             {
@@ -265,7 +273,7 @@ namespace Hamsterdagis_Dessi
 
         }
 
-        public void checkOutFromExArea()
+        public void CheckOutFromExArea()
         {
 
             using (var hamsterContext = new HamsterAppContext())
@@ -303,7 +311,44 @@ namespace Hamsterdagis_Dessi
             }
         }
 
-        public bool checkIfAreaIsFree()
+        public void CheckOutFromSpaArea()
+        {
+
+            using (var hamsterContext = new HamsterAppContext())
+            {
+
+                var area = hamsterContext.SpaAreas.Single(area => area.AmountInArea >= 0);
+                area.AmountInArea = 0;
+
+                var listOfHamsters = hamsterContext.Hamsters.Where(hamster => hamster.ActivityId == 5)
+                      .ToList();
+
+                if (listOfHamsters.Count() != 0)
+                {
+
+                    foreach (var hamster in listOfHamsters)
+                    {
+                        if (CurrentTime - hamster.StartTimeSpa >= new TimeSpan(00, 50, 00))
+                        {
+                            hamster.ActivityId = 2;
+
+                            allinfo.Hamster = hamster;
+                            ReportEventHandler?.Invoke(this, allinfo);
+
+                            hamsterContext.Logg_Activities.Add(new Logg_Activities { Timestamp = CurrentTime, Hamster = hamster, ActivityId = 2 });
+                            hamsterContext.SaveChanges();
+
+                        }
+
+
+                    }
+
+                }
+
+            }
+        }
+
+        public bool CheckIfAreaIsFree()
         {
             using (var hamsterContext = new HamsterAppContext())
             {
@@ -319,19 +364,35 @@ namespace Hamsterdagis_Dessi
                 }
             }
         }
+        public bool CheckIfSpaAreaIsFree()
+        {
+            using (var hamsterContext = new HamsterAppContext())
+            {
+                var isFree = hamsterContext.SpaAreas.Where(area => area.AmountInArea == 0);
+                if (isFree.Count().Equals(1))
+                {
 
-        public void moveToExercise()
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
+        public void MoveToExercise()
         {
             using (var hamsterContext = new HamsterAppContext())
             {
 
-                if (checkIfAreaIsFree())
+                if (CheckIfAreaIsFree())
                 {
                     if (CurrentTime.Minute == 18 && CurrentTime.Hour < 17 && CurrentTime.Hour > 7)
                     {
                          var area = hamsterContext.ExerciseAreas.Single(area => area.Id == 1);
 
-                        var listOfHamsters = hamsterContext.Hamsters.Select(h=>h)
+                        var listOfHamsters = hamsterContext.Hamsters.Where(h=>h.ActivityId == 2)
                             .OrderBy(hamster => hamster.AmountOfExercises)
                             .ThenBy(hamster => hamster.Age)
                             .ToList();
@@ -392,7 +453,68 @@ namespace Hamsterdagis_Dessi
 
             }
         }
+        public void MoveToSpa()
+        {
+            using (var hamsterContext = new HamsterAppContext())
+            {
+                if (CheckIfSpaAreaIsFree())
+                {
+                    if (CurrentTime.Minute == 24 && CurrentTime.Hour < 17 && CurrentTime.Hour > 7)
+                    {
+                        var area = hamsterContext.SpaAreas.Single(area => area.Id == 1);
 
+                        var listOfHamsters = hamsterContext.Hamsters.Where(h => h.ActivityId == 2)
+                            .OrderBy(hamster => hamster.AmountOfSpaVisits)
+                            .ThenBy(hamster => hamster.Age)
+                            .ToList();
+
+                        var listOfHamstersTop6 = listOfHamsters.Where(hamster => hamster.GenderId == 1).Take(4);
+                        var listOfHamstersMalesTop6 = listOfHamsters.Where(hamster => hamster.GenderId == 2).Take(4);
+
+                        var averageSpaFemales = listOfHamstersTop6.Average(h => h.AmountOfSpaVisits);
+                        var averageSpaMales = listOfHamstersMalesTop6.Average(h => h.AmountOfSpaVisits);
+
+                        if (averageSpaFemales < averageSpaMales)
+                        {
+                            foreach (var hamster in listOfHamstersTop6)
+                            {
+                                area.AmountInArea++;
+                                hamster.ActivityId = 5;
+                                hamster.AmountOfSpaVisits++;
+                                hamster.StartTimeSpa = CurrentTime;
+                                hamsterContext.SaveChanges();
+                                allinfo.Hamster = hamster;
+                                ReportEventHandler?.Invoke(this, allinfo);
+
+                                hamsterContext.Logg_Activities.Add(new Logg_Activities { Timestamp = CurrentTime, Hamster = hamster, ActivityId = 5 });
+                                hamsterContext.SaveChanges();
+
+                            }
+                        }
+                        else
+                        {
+                            foreach (var hamster in listOfHamstersMalesTop6)
+                            {
+                                area.AmountInArea++;
+                                hamster.ActivityId = 5;
+                                hamster.AmountOfSpaVisits++;
+                                hamster.StartTimeSpa = CurrentTime;
+                                hamsterContext.SaveChanges();
+                                allinfo.Hamster = hamster;
+                                ReportEventHandler?.Invoke(this, allinfo);
+
+                                hamsterContext.Logg_Activities.Add(new Logg_Activities { Timestamp = CurrentTime, Hamster = hamster, ActivityId = 5 });
+                                hamsterContext.SaveChanges();
+
+                            }
+                        }
+
+                    }
+
+                }
+
+            }
+        }
         internal void Pause()
         {
             if (AmountOfTicks > CurrentAmountOfTicks)
@@ -413,7 +535,7 @@ namespace Hamsterdagis_Dessi
             else
             {
                 ConsoleKey input = ConsoleKey.Enter;
-                if (input== ConsoleKey.Enter)
+                if (input == ConsoleKey.Enter)
                 {
                     Environment.Exit(0);
                 }

@@ -23,6 +23,9 @@ namespace BackEnd_database
 
         public int AmountOfExercises { get; set; }
 
+        public int AmountOfSpaVisits { get; set; }
+        public DateTime? StartTimeSpa { get; set; }
+
 
         public virtual ICollection<Logg_Activities> Logg_Activities { get; set; } 
 

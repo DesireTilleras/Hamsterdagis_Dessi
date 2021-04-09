@@ -69,6 +69,9 @@ namespace Hamsterdagis_Dessi
 
             modelBuilder.Entity<ExerciseArea>().HasData(
                 new ExerciseArea { Id = 1, AmountInArea = 0});
+           
+            modelBuilder.Entity<SpaArea>().HasData(
+              new SpaArea { Id = 1, AmountInArea = 0 });
 
             string[] csvLines = File.ReadAllLines("Hamsterlista30.csv");
 
