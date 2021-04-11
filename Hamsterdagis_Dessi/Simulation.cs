@@ -1,17 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using System.Linq;
 using System.Threading;
 using BackEnd_database;
-using System.IO;
-using Microsoft.EntityFrameworkCore;
+
 
 namespace Hamsterdagis_Dessi
 {
-    public class Simulation
+    internal class Simulation
     {
         public Simulation()
         {
@@ -20,19 +16,16 @@ namespace Hamsterdagis_Dessi
 
         Hamster hamster;
 
-        public DateTime SimulationStart { get; set; }
+        internal DateTime SimulationStart { get; set; }
 
-        static Timer Tick = null;
-        public DateTime CurrentTime { get; set; }
-                      
-        public int AmountOfTicks { get; set; } 
-        public int CurrentAmountOfTicks { get; set; }
+        internal Timer Tick = null;
+        internal DateTime CurrentTime { get; set; }
+        internal int AmountOfTicks { get; set; }
+        internal int CurrentAmountOfTicks { get; set; }
+        internal int TimeOfOneTick { get; set; }
+        internal bool IsRunning { get; set; }
 
-        public int TimeOfOneTick { get; set; }
-
-        public int CountingDaysTick { get; set; }
-
-        public bool IsRunning { get; set; }
+        private readonly SemaphoreSlim _semaphore = new(1, 1);
 
         public event EventHandler<ReportEventArgs> ReportEventHandler;
         ReportEventArgs allinfo = new ReportEventArgs();
@@ -46,8 +39,12 @@ namespace Hamsterdagis_Dessi
         public event EventHandler<HamsterInfoEventArgs> HamsterInfo;
         HamsterInfoEventArgs hamsterInfo = new HamsterInfoEventArgs();
 
-
-        public async void OnTick(Object state)
+        /// <summary>
+        /// This invokes the event of the print of currentTime on the console. 
+        /// It also runs all the functions with await.
+        /// </summary>
+        /// <param name="state"></param>
+        internal async void OnTick(Object state)
         {
             if (AmountOfTicks >= CurrentAmountOfTicks)
             {
@@ -55,22 +52,33 @@ namespace Hamsterdagis_Dessi
                 TimeReport?.Invoke(this, Time);
 
                 CurrentTime = CurrentTime.AddMinutes(6);
-
-                await Task.Run(() => MoveToExercise());
-                await Task.Run(() => MoveToSpa());
-                await Task.Run(() => CheckOutFromExArea());
-                await Task.Run(() => CheckOutFromSpaArea());
-                await Task.Run(() => CheckOutDay());
-                await Task.Run(() => CheckIn());
-                await Task.Run(() => PutInCageFemales());
-                await Task.Run(() => PutInCageMales());
-                await Task.Run(() => NewDay());
+                await _semaphore.WaitAsync();
+                try
+                {
+                    await Task.Run(() => MoveToExercise());
+                    await Task.Run(() => MoveToSpa());
+                    await Task.Run(() => CheckOutFromExArea());
+                    await Task.Run(() => CheckOutFromSpaArea());
+                    await Task.Run(() => CheckOutDay());
+                    await Task.Run(() => CheckIn());
+                    await Task.Run(() => PutInCageFemales());
+                    await Task.Run(() => PutInCageMales());
+                    await Task.Run(() => NewDay());
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
 
                 CurrentAmountOfTicks++;
             }
         }
-
-        public void StartSimulation(int days, int minutesOfSimulation)
+        /// <summary>
+        /// This function calculates how fast a tick is, depending on what the user choses. 
+        /// </summary>
+        /// <param name="days"></param>
+        /// <param name="minutesOfSimulation"></param>
+        internal void StartSimulation(int days, int minutesOfSimulation)
         {
 
             SimulationStart = new DateTime(2021, 03, 26, 07, 00, 00);
@@ -88,8 +96,10 @@ namespace Hamsterdagis_Dessi
 
             }
         }
-
-        public void ClearLoggFile()
+        /// <summary>
+        /// This method cleares the loggfile when a new simulation starts.
+        /// </summary>
+        internal void ClearLoggFile()
         {
             using (var hamsterContext = new HamsterAppContext())
             {
@@ -103,12 +113,15 @@ namespace Hamsterdagis_Dessi
                 hamsterContext.SaveChanges();
             }
         }
-        public void NewDay()
+        /// <summary>
+        /// When the time for the currentTick is 17.24, a new day starts. 
+        /// </summary>
+        internal void NewDay()
         {
-            if (CurrentTime.Hour == 17 && CurrentTime.Minute == 18)
+            if (CurrentTime.Hour == 17 && CurrentTime.Minute == 24)
             {
                 SimulationStart = SimulationStart.AddDays(1);
-              
+
                 using (var hamsterContext = new HamsterAppContext())
                 {
                     hamsterContext.Hamsters.Select(hamster => hamster)
@@ -118,10 +131,12 @@ namespace Hamsterdagis_Dessi
 
                 }
                 CurrentTime = SimulationStart;
-             }
+            }
         }
-
-        public void CheckOutDay()
+        /// <summary>
+        /// This checks out all the hamsters when one day is finished.
+        /// </summary>
+        internal void CheckOutDay()
         {
 
             using (var hamsterContext = new HamsterAppContext())
@@ -175,16 +190,19 @@ namespace Hamsterdagis_Dessi
                 }
             }
         }
-
-        public void PutInCageFemales()
+        /// <summary>
+        /// This function puts all the female hamsters in their cages, 3 and 3. 
+        /// </summary>
+        internal void PutInCageFemales()
         {
             using (var hamsterContext = new HamsterAppContext())
             {
-                lock (this)
+
+                if (CurrentTime.Hour == 7 && CurrentTime.Minute == 24)
                 {
                     var listOfHamsters = hamsterContext.Hamsters.Where(hamster => hamster.Gender.Id == 1)
-                               .Where(hamster => hamster.ActivityId == 1)
-                               .ToList();
+                          .Where(hamster => hamster.ActivityId == 1)
+                          .ToList();
 
                     while (listOfHamsters.Count != 0)
                     {
@@ -207,18 +225,25 @@ namespace Hamsterdagis_Dessi
 
                         }
                     }
+
                 }
+
+
             }
         }
-        public void PutInCageMales()
+        /// <summary>
+        /// This function puts all the males in their cages after they are checked in at the daycare
+        /// </summary>
+        internal void PutInCageMales()
         {
             using (var hamsterContext = new HamsterAppContext())
             {
-                lock (this)
+
+                if (CurrentTime.Hour == 7 && CurrentTime.Minute == 24)
                 {
                     var listOfHamsters = hamsterContext.Hamsters.Where(hamster => hamster.Gender.Id == 2)
-                               .Where(hamster => hamster.ActivityId == 1)
-                               .ToList();
+                           .Where(hamster => hamster.ActivityId == 1)
+                           .ToList();
 
 
 
@@ -242,38 +267,42 @@ namespace Hamsterdagis_Dessi
                         }
                     }
                 }
+
             }
         }
-
-        public void CheckIn()
+        /// <summary>
+        /// This function checks in all the hamsters and gives them the status "Arrival"
+        /// </summary>
+        internal void CheckIn()
         {
-            lock (this)
+
+            if (CurrentTime.Hour == 7 && CurrentTime.Minute == 12)
             {
-                if (CurrentTime.Hour == 7)
+                using (var hamsterContext = new HamsterAppContext())
                 {
-                    using (var hamsterContext = new HamsterAppContext())
+                    var notCheckedIn = hamsterContext.Hamsters.Where(hamster => hamster.ActivityId == null)
+                        .ToList();
+
+                    foreach (var hamster in notCheckedIn)
                     {
-                        var notCheckedIn = hamsterContext.Hamsters.Where(hamster => hamster.ActivityId == null)
-                            .ToList();
-
-                        foreach (var hamster in notCheckedIn)
-                        {
-                            hamster.ActivityId = 1;
-                            hamster.TimeWaited = new TimeSpan(00, 00, 00);
-                            hamster.CheckInTime = CurrentTime;
-                            hamsterContext.SaveChanges();
-                            hamsterContext.Logg_Activities.Add(new Logg_Activities { Timestamp = CurrentTime, Hamster = hamster, ActivityId = 1 });
-                            hamsterContext.SaveChanges();
-
-                        }
+                        hamster.ActivityId = 1;
+                        hamster.TimeWaited = new TimeSpan(00, 00, 00);
+                        hamster.CheckInTime = CurrentTime;
+                        hamsterContext.SaveChanges();
+                        hamsterContext.Logg_Activities.Add(new Logg_Activities { Timestamp = CurrentTime, Hamster = hamster, ActivityId = 1 });
+                        hamsterContext.SaveChanges();
 
                     }
+
                 }
+
             }
 
         }
-
-        public void CheckOutFromExArea()
+        /// <summary>
+        /// After the hamsters has exercised 50 minutes, this function checks out the hamsters from exercisearea
+        /// </summary>
+        internal void CheckOutFromExArea()
         {
 
             using (var hamsterContext = new HamsterAppContext())
@@ -310,8 +339,10 @@ namespace Hamsterdagis_Dessi
 
             }
         }
-
-        public void CheckOutFromSpaArea()
+        /// <summary>
+        /// When the hamsters has been at the spa for 50 minutes, they are checked out
+        /// </summary>
+        internal void CheckOutFromSpaArea()
         {
 
             using (var hamsterContext = new HamsterAppContext())
@@ -347,8 +378,11 @@ namespace Hamsterdagis_Dessi
 
             }
         }
-
-        public bool CheckIfAreaIsFree()
+        /// <summary>
+       /// This function checks if the exercisearea is free.
+       /// </summary>
+       /// <returns></returns>
+        internal bool CheckIfAreaIsFree()
         {
             using (var hamsterContext = new HamsterAppContext())
             {
@@ -364,7 +398,11 @@ namespace Hamsterdagis_Dessi
                 }
             }
         }
-        public bool CheckIfSpaAreaIsFree()
+        /// <summary>
+        /// This function checks if the spaarea is free
+        /// </summary>
+        /// <returns></returns>
+        internal bool CheckIfSpaAreaIsFree()
         {
             using (var hamsterContext = new HamsterAppContext())
             {
@@ -380,19 +418,21 @@ namespace Hamsterdagis_Dessi
                 }
             }
         }
-
-        public void MoveToExercise()
+        /// <summary>
+        /// This function will move 6 hamsters to the exercise. It will choose females if the average amount of exercise for the males are higher. 
+        /// The lists are ordered by the amount of exercise and also age of the hamsters
+        /// </summary>
+        internal void MoveToExercise()
         {
             using (var hamsterContext = new HamsterAppContext())
             {
-
                 if (CheckIfAreaIsFree())
                 {
                     if (CurrentTime.Minute == 18 && CurrentTime.Hour < 17 && CurrentTime.Hour > 7)
                     {
-                         var area = hamsterContext.ExerciseAreas.Single(area => area.Id == 1);
+                        var area = hamsterContext.ExerciseAreas.Single(area => area.Id == 1);
 
-                        var listOfHamsters = hamsterContext.Hamsters.Where(h=>h.ActivityId == 2)
+                        var listOfHamsters = hamsterContext.Hamsters.Where(h => h.ActivityId == 2)
                             .OrderBy(hamster => hamster.AmountOfExercises)
                             .ThenBy(hamster => hamster.Age)
                             .ToList();
@@ -428,32 +468,36 @@ namespace Hamsterdagis_Dessi
                         {
                             foreach (var hamster in listOfHamstersMalesTop6)
                             {
-                                    area.AmountInArea++;
-                                    hamster.StartTimeExercise = CurrentTime;
-                                    hamster.ActivityId = 3;
-                                    hamster.AmountOfExercises++;
+                                area.AmountInArea++;
+                                hamster.StartTimeExercise = CurrentTime;
+                                hamster.ActivityId = 3;
+                                hamster.AmountOfExercises++;
                                 if (hamster.AmountOfExercises <= 1)
                                 {
                                     hamster.TimeWaited = hamster.StartTimeExercise - hamster.CheckInTime;
                                 }
 
-                                    hamsterContext.SaveChanges();
-                                    allinfo.Hamster = hamster;
-                                    ReportEventHandler?.Invoke(this, allinfo);
+                                hamsterContext.SaveChanges();
+                                allinfo.Hamster = hamster;
+                                ReportEventHandler?.Invoke(this, allinfo);
 
-                                    hamsterContext.Logg_Activities.Add(new Logg_Activities { Timestamp = CurrentTime, Hamster = hamster, ActivityId = 3 });
-                                    hamsterContext.SaveChanges();
+                                hamsterContext.Logg_Activities.Add(new Logg_Activities { Timestamp = CurrentTime, Hamster = hamster, ActivityId = 3 });
+                                hamsterContext.SaveChanges();
 
                             }
                         }
-                        
+
                     }
- 
+
                 }
 
             }
         }
-        public void MoveToSpa()
+        /// <summary>
+        /// This function moves hamsters to the spa. it will choose females if the average amount of spa visits are higher for the males.
+        /// It takes the top 4 hamsters ordered by amount of spavisits and age.
+        /// </summary>
+        internal void MoveToSpa()
         {
             using (var hamsterContext = new HamsterAppContext())
             {
@@ -515,6 +559,9 @@ namespace Hamsterdagis_Dessi
 
             }
         }
+        /// <summary>
+        /// This function makes it possible to pause the simulation
+        /// </summary>
         internal void Pause()
         {
             if (AmountOfTicks > CurrentAmountOfTicks)
@@ -522,7 +569,7 @@ namespace Hamsterdagis_Dessi
                 if (IsRunning)
                 {
                     IsRunning = false;
-                    Console.WriteLine("Paused, Press any key to continue");
+                    Console.WriteLine("Paused, Press enter to continue");
                     Tick.Change(Timeout.Infinite, Timeout.Infinite);
                 }
                 else
@@ -540,7 +587,7 @@ namespace Hamsterdagis_Dessi
                     Environment.Exit(0);
                 }
             }
-           
+
         }
 
     }
